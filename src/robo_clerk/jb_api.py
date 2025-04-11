@@ -31,7 +31,7 @@ def JB_start_game(api_url, api_key, player_name, save_dir="downloads"):
         "player_name": player_name
     }
 
-    response = requests.post(api_url, json=payload, headers=headers)
+    response = requests.post(f"{api_url}/start", json=payload, headers=headers)
 
     if response.status_code != 200:
         raise Exception(f"API call failed: {response.status_code} - {response.text}")
@@ -61,3 +61,19 @@ def JB_start_game(api_url, api_key, player_name, save_dir="downloads"):
         player_id=data.get("player_id", ""),
         client_id=data.get("client_id", "")
     )
+
+def JB_send_decision(api_url, api_key, game_session: GameSession, decision: str):
+    headers = {
+      "x-api-key": api_key,
+      "Content-Type": "application/json"
+    }
+    payload = {
+      "decision": decision,
+      "session_id": game_session.session_id,
+      "client_id": game_session.client_id
+    }
+
+    response = requests.post(f"{api_url}/decision", json=payload, headers=headers)
+    data = response.json()
+    print(data)
+    return data.get("status", '') is not "gameover"
