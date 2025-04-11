@@ -1,4 +1,3 @@
-import time
 import os
 from dotenv import load_dotenv
 from robo_clerk.jb_api import JB_send_decision, JB_start_game
@@ -13,10 +12,10 @@ def make_decision():
 def play_game():
     api_key = os.getenv("API_KEY")
     api_url = os.getenv("API_URL")
-    game_session = JB_start_game(api_key=api_key, api_url=api_url, player_name="Smiling Monkeys")
+    game_session = JB_start_game(api_url=api_url, api_key=api_key, player_name="Smiling Monkeys")
     while True:
         decision = make_decision()
-        success = JB_send_decision(api_key, api_url, game_session, decision)
+        success = JB_send_decision(api_url, api_key, game_session, decision)
         if success:
             print("✅ Good move! Keep going...\n")
         else:
