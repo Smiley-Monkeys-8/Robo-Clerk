@@ -10,7 +10,19 @@ class GameSession:
     player_id: str
     client_id: str
 
-def JB_start_game(api_url, api_key, player_name, save_dir="downloads") -> GameSession:
+def detect_file_extension(decoded_bytes):
+    if decoded_bytes.startswith(b'\x89PNG'):
+        return '.png'
+    elif decoded_bytes.startswith(b'PK') and b'word/' in decoded_bytes:
+        return '.docx'
+    elif decoded_bytes.startswith(b'%PDF'):
+        return '.pdf'
+    elif all(chr(b).isprintable() or chr(b).isspace() for b in decoded_bytes[:100]):
+        return '.txt'
+    else:
+        return ''  # Unknown extension
+
+def JB_start_game(api_url, api_key, player_name, save_dir="downloads"):
     headers = {
         "x-api-key": api_key,
         "Content-Type": "application/json"
@@ -32,19 +44,20 @@ def JB_start_game(api_url, api_key, player_name, save_dir="downloads") -> GameSe
     client_data = data.get("client_data", {})
     if client_data:
         os.makedirs(save_dir, exist_ok=True)
-        for filename, b64_content in client_data.items():
-            print(filename)
+        for base_filename, b64_content in client_data.items():
             try:
+                decoded = base64.b64decode(b64_content)
+                ext = detect_file_extension(decoded)
+                filename = f"{base_filename}{ext}" if not base_filename.endswith(ext) else base_filename
                 file_path = os.path.join(save_dir, filename)
-                
                 with open(file_path, "wb") as f:
-                    f.write(base64.b64decode(b64_content))
+                    f.write(decoded)
                 print(f"Saved file: {file_path}")
             except Exception as e:
-                print(f"Failed to save file {filename}: {e}")
+                print(f"Failed to save file {base_filename}: {e}")
 
     return GameSession(
-        session_id=data.get("session_id"),
-        player_id=data.get("player_id"),
-        client_id=data.get("client_id")
+        session_id=data.get("session_id", ""),
+        player_id=data.get("player_id", ""),
+        client_id=data.get("client_id", "")
     )
