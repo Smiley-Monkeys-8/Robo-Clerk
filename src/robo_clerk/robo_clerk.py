@@ -1,10 +1,19 @@
-import random
 import time
+import os
+from dotenv import load_dotenv
+from .jb_api import api_call_start_game
+
+# Load the .env file from the project root
+load_dotenv()
 
 def start_game():
     print("🎮 Welcome to the Decision Quest!")
     print("Make the right choices or the game ends.")
     print("-" * 40)
+    api_key = os.getenv("API_KEY")
+    api_url = os.getenv("API_URL")
+    game_session = api_call_start_game(api_key=api_key, api_url=api_url, player_name="SmileyMonkey")
+    print(game_session)
 
 def make_decision():
     decision = input("Choose your action (accept/reject): ").strip().lower()

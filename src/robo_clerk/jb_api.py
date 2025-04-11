@@ -1,8 +1,15 @@
 import requests
 import base64
 import os
+from dataclasses import dataclass
 
-def start_game(api_url, api_key, player_name, save_dir="downloads"):
+@dataclass
+class GameSession:
+    session_id: str
+    player_id: str
+    client_id: str
+
+def start_game(api_url, api_key, player_name, save_dir="downloads") -> GameSession:
     headers = {
         "x-api-key": api_key,
         "Content-Type": "application/json"
@@ -17,6 +24,8 @@ def start_game(api_url, api_key, player_name, save_dir="downloads"):
         raise Exception(f"API call failed: {response.status_code} - {response.text}")
 
     data = response.json()
+    with open("response.json", "w") as response_file:
+      response_file.write(data)
 
     # Save files from client_data.data if present
     client_data = data.get("client_data", {}).get("data", {})
@@ -31,4 +40,8 @@ def start_game(api_url, api_key, player_name, save_dir="downloads"):
             except Exception as e:
                 print(f"Failed to save file {filename}: {e}")
 
-    return data
+    return GameSession(
+        session_id=data.get("session_id"),
+        player_id=data.get("player_id"),
+        client_id=data.get("client_id")
+    )
