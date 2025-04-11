@@ -1,3 +1,4 @@
+import json
 import requests
 import base64
 import os
@@ -25,15 +26,17 @@ def JB_start_game(api_url, api_key, player_name, save_dir="downloads") -> GameSe
 
     data = response.json()
     with open("response.json", "w") as response_file:
-      response_file.write(data)
+      json.dump(data, response_file)
 
     # Save files from client_data.data if present
-    client_data = data.get("client_data", {}).get("data", {})
+    client_data = data.get("client_data", {})
     if client_data:
         os.makedirs(save_dir, exist_ok=True)
         for filename, b64_content in client_data.items():
+            print(filename)
             try:
                 file_path = os.path.join(save_dir, filename)
+                
                 with open(file_path, "wb") as f:
                     f.write(base64.b64decode(b64_content))
                 print(f"Saved file: {file_path}")
