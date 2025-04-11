@@ -1,7 +1,7 @@
 import time
 import os
 from dotenv import load_dotenv
-from .jb_api import api_call_start_game
+from robo_clerk.jb_api import JB_start_game
 
 # Load the .env file from the project root
 load_dotenv()
@@ -12,7 +12,7 @@ def start_game():
     print("-" * 40)
     api_key = os.getenv("API_KEY")
     api_url = os.getenv("API_URL")
-    game_session = api_call_start_game(api_key=api_key, api_url=api_url, player_name="SmileyMonkey")
+    game_session = JB_start_game(api_key=api_key, api_url=api_url, player_name="SmileyMonkey")
     print(game_session)
 
 def make_decision():

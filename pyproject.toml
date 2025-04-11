@@ -7,13 +7,12 @@ readme = "README.md"
 packages = [{ include = "robo_clerk", from = "src" }]
 
 [tool.poetry.scripts]
-robo_clerk = "robo_clerk.robo_clerk:main"
+robo-clerk = "robo_clerk.robo_clerk:play_game"
 
 [tool.poetry.dependencies]
 python = "^3.10"
 requests = "^2.32.3"
 load-dotenv = "^0.1.0"
-
 
 [build-system]
 requires = ["poetry-core"]

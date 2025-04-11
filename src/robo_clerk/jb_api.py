@@ -9,7 +9,7 @@ class GameSession:
     player_id: str
     client_id: str
 
-def start_game(api_url, api_key, player_name, save_dir="downloads") -> GameSession:
+def JB_start_game(api_url, api_key, player_name, save_dir="downloads") -> GameSession:
     headers = {
         "x-api-key": api_key,
         "Content-Type": "application/json"
