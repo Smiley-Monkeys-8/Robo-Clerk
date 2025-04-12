@@ -55,6 +55,8 @@ def get_file_name(file_path: str) -> str:
     return os.path.basename(file_path)
 
 def process_documents(input_folder_path, output_folder_path, output_file="client_data.json"):
+    os.makedirs(output_folder_path, exist_ok=True)
+
     with open(os.path.join(output_folder_path, output_file), "w") as output_json:
         output_json.write("[]")
     for file_path in list_files_in_folder(input_folder_path):

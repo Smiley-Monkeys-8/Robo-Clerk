@@ -19,8 +19,6 @@ def process_test_data():
     for folder in list_folders_in_folder("./test_data"):
         client_id = get_client_id_from_folder(folder_name=folder)
         print(client_id, get_result(client_id=client_id).value)
-        output_directory = "out"
-        os.makedirs(output_directory, exist_ok=True)
 
         process_documents(folder, "out", output_file=f"client_data_{client_id}.json")
         
