@@ -1,6 +1,8 @@
 import re
 import json
-import os
+from typing import List
+
+from robo_clerk.doc_processors.types import Feature
 
 
 def extract_client_info_from_text(text):
@@ -477,6 +479,20 @@ def process_text_file(file_path):
     except Exception as e:
         print(f"Error processing text file: {e}")
         return {"error": str(e)}
+
+class TXTProcessor:
+    def __init__(self, file_path):
+        self.file_path = file_path
+
+
+    def extract_client_info(self) -> List[Feature]:
+        data = process_text_file(self.file_path)
+        features: List[Feature] = [Feature(key=key, value=value, coordinates={}) for key, value in data.items()]
+        return features
+        
+    # Run all steps
+    def run_pipeline(self) -> List[Feature]:
+        return self.extract_client_info()
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ import os
 from robo_clerk.doc_processors.docx import DOCXProcessor
 from robo_clerk.doc_processors.pdf import PDFProcessor
 from robo_clerk.doc_processors.png import PNGProcessor
+from robo_clerk.doc_processors.text_extractor import TXTProcessor
 
 # For simplicity define consts as the name of the docs
 
@@ -28,6 +29,9 @@ def get_document_processor(file_type: FileType):
         return DOCXProcessor
     if (file_type == FileType.PNG):
         return PNGProcessor
+    if (file_type == FileType.TXT):
+        return TXTProcessor   
+    
     return None
 
 def list_files_in_folder(folder_path: str):
