@@ -48,3 +48,5 @@ for file_name in list_files_in_folder("out"):
 print(f"Correct: {correct}")
 print(f"False positive: {false_positive}")
 print(f"False negative: {false_negative}")
+
+print(f"percentage: {(correct*100)/(correct+false_negative+false_positive)}%")
