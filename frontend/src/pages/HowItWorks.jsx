@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 export const HowItWorks = () => {
   return (
-    <div className="flex bg-black-haze  pt-10 justify-evenly items-center pb-7">
+    <div className="flex bg-black-haze pt-10 justify-evenly items-center pb-7">
       <div>
         <img
           src={ImgHowItWorks}
