@@ -18,6 +18,8 @@ FIELD_LABELS = [
     # , "DANMARK",     "KONGERIGET", "DANISH", "DANSK", "<<", "<"
 ]
 
+
+
 # Crop the image to remove the MRZ area
 def preprocess_image(image_path):
     image = Image.open(image_path)
@@ -29,7 +31,7 @@ def preprocess_image(image_path):
     lower = image.height - 60 # crop the last 100 pixels (MRZ area)
 
     # Crop the image
-    image = image.crop((left, upper, right, lower))
+    # image = image.crop((left, upper, right, lower))
 
     # Convert to grayscale
     image = image.convert("L")
@@ -38,6 +40,11 @@ def preprocess_image(image_path):
     image = ImageEnhance.Contrast(image).enhance(2)
 
     # Apply sharpen filter
+    new_size = (1200, 900)  # e.g., (300, 200)
+
+    # Resize image
+    image = image.resize(new_size)  # ANTIALIAS gives better quality
+    # image = image.filter(ImageFilter.GaussianBlur)
     image = image.filter(ImageFilter.SHARPEN)
     
     return image
@@ -90,23 +97,71 @@ def extract_passport_data(text):
 
     return extracted
 
+def crop_and_get_text(image, box):
+    cropped_image = image.crop(box)
+    cropped_image.save("cropped.png")
+    text = pytesseract.image_to_string(cropped_image)
+    return text.strip()
+
+
 # Main processing function
 def process_passport_image(image_path, output_path="./data/passport_data.json"):
     image = preprocess_image(image_path)
-    text = pytesseract.image_to_string(image, lang=TESS_LANG)
-
-    print("\nExtracted Text:")
-    print(text)
-
-    extracted_data = extract_passport_data(text)
-
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(extracted_data, f, indent=4, ensure_ascii=False)
-
-    print("\n✅ Extracted data saved to", output_path)
-    print("\n📋 Extracted Passport Data:")
-    print(json.dumps(extracted_data, indent=4, ensure_ascii=False))
-    return extracted_data
+    image.save("test.png")
+    
+    # box_mapping = {
+    #     "country":(50, 0, image.width, 120),
+    #     "surname":
+    #     "given_name"
+    #     "birth_date"
+    #     "citizenship"
+    #     "sex"
+    #     "issue_date"
+    #     "expiry_date"
+    #     "passport_number"
+    # }
+    
+    # get country
+    country_crop = (50, 0, image.width, 120)
+    country = crop_and_get_text(image, country_crop)
+    print(country)
+    # get surname
+    surname_crop = (50, 300, 300, 380)
+    surname = crop_and_get_text(image, surname_crop)
+    print(surname)
+    # get given name
+    given_name_crop = (300, 300, 900, 380)
+    given_name = crop_and_get_text(image, given_name_crop)
+    print(given_name)   
+    # birth date
+    birth_date_crop = (50, 420, 300, 480)
+    birth_date = crop_and_get_text(image, birth_date_crop)
+    print(birth_date)
+    # citizenship
+    citizenship_crop = (300, 420, 900, 480)
+    citizenship = crop_and_get_text(image, citizenship_crop)
+    print(citizenship)
+    # get sex
+    sex_crop = (50, 540, 300, 600)
+    sex = crop_and_get_text(image, sex_crop)
+    print(sex)
+    # get issue data
+    issue_date_crop = (300, 540, 900, 600)
+    issue_date = crop_and_get_text(image, issue_date_crop)
+    print(issue_date)
+    # get expiry date
+    expiry_date_crop = (300, 630, 800, 700)
+    expiry_date = crop_and_get_text(image, expiry_date_crop)
+    print(expiry_date)
+    # passport number
+    passport_number_crop = (700, 160, 1100, 200)
+    passport_number = crop_and_get_text(image, passport_number_crop)
+    print(passport_number)
+    
+    
+    return {
+        
+    }
 
 class PNGProcessor:
     def __init__(self, file_path):
