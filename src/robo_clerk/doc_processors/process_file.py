@@ -1,10 +1,6 @@
 """
-File Processing Script
-
-This script:
-1. Takes a description.txt file from 'downloads' folder
-2. Extracts client information from it
-3. Saves the JSON result to 'data' folder as description.txt.json
+Usage from project root:
+    poetry run python3 src/robo_clerk/doc_processors/process_file.py
 """
 
 import os
@@ -17,13 +13,6 @@ def process_description_file(input_folder_path, output_folder_path):
     """
     Process a description.txt file from the input folder and save
     the extracted information as JSON in the output folder.
-
-    Args:
-        input_folder_path: Path to the folder containing description.txt
-        output_folder_path: Path to save the resulting JSON file
-
-    Returns:
-        True if successful, False otherwise
     """
     # Ensure folders exist
     if not os.path.exists(input_folder_path):
@@ -56,6 +45,7 @@ def process_description_file(input_folder_path, output_folder_path):
             json.dump(client_info, file, indent=2, ensure_ascii=False)
 
         print(f"Success: Processed '{input_file_path}' and saved result to '{output_file_path}'")
+
         return True
 
     except Exception as e:
@@ -64,14 +54,22 @@ def process_description_file(input_folder_path, output_folder_path):
 
 
 if __name__ == "__main__":
-    # Default folder paths
-    input_folder_path = "downloads"
-    output_folder_path = "data"
+    # Default paths based on your project structure
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+    default_input_path = os.path.join(project_root, "downloads")
+    default_output_path = os.path.join(project_root, "data")
 
     # Allow overriding paths from command line
     if len(sys.argv) >= 3:
         input_folder_path = sys.argv[1]
         output_folder_path = sys.argv[2]
+    else:
+        input_folder_path = default_input_path
+        output_folder_path = default_output_path
+
+    # Print paths for verification
+    print(f"Processing files from: {input_folder_path}")
+    print(f"Saving results to: {output_folder_path}")
 
     # Process the file
     success = process_description_file(input_folder_path, output_folder_path)

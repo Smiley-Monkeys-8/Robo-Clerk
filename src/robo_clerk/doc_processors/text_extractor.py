@@ -1,62 +1,73 @@
-"""
-Text Description Extractor for Bank Client Information
-
-This module extracts client information from text descriptions and
-formats it into a standardized JSON structure matching the format
-used for other document types.
-"""
-
 import re
 import json
-import random
+import os
 
 
 def extract_client_info_from_text(text):
-    """
-    Extract client information from a text description and format it
-    in a standardized structure.
-
-    Args:
-        text: The raw text description of a client
-
-    Returns:
-        Dictionary containing structured client information
-    """
-    # Initialize the result dictionary with the structure we want
     result = {
         "client_info": {
             "account_name": "",
             "account_holder_name": "",
             "account_holder_surname": "",
-            "passport_number": "",
             "chf": "/Off",
             "eur": "/Off",
             "usd": "/Off",
             "other_ccy": "",
-            "building_number": "",
-            "postal_code": "",
             "city": "",
             "country": "",
             "name": "",
-            "phone_number": "",
-            "email": "",
-            "street_name": "",
-            "signature_image_found": False
+            "signature_image_found": False,
+
+            # Personal information
+            "age": "",
+            "occupation": "",
+            "marital_status": "",
+            "children": [],
+
+            # Financial information
+            "last_salary": {
+                "amount": "",
+                "currency": ""
+            },
+            "savings": {
+                "amount": "",
+                "currency": ""
+            },
+            "real_estate": [],
+            "inheritance_details": {
+                "amount": "",
+                "currency": "",
+                "year": "",
+                "relation": "",
+                "relative_occupation": ""
+            },
+
+            # Education information
+            "education": {
+                "secondary_school": "",
+                "secondary_graduation_year": "",
+                "university": [],
+                "university_graduation_years": []
+            },
+
+            # Career information
+            "career_history": []
         }
     }
 
     # EXTRACT NAME
     # Try multiple patterns for full name extraction
     name_patterns = [
-        r"([A-Za-z\s]+) is (\d+) years old",              # Name is X years old
-        r"([A-Za-z\s]+) is a (\d+) year old",             # Name is a X year old
-        r"The RM has known ([A-Za-z\s]+) since",          # The RM has known Name since
-        r"family friend of ([A-Za-z\s]+)'s parents",      # family friend of Name's parents
-        r"([A-Za-z\s]+) and the RM met",                  # Name and the RM met
-        r"([A-Za-z\s]+) has been happily married",        # Name has been happily married
-        r"([A-Za-z\s]+) is married to",                   # Name is married to
-        r"([A-Za-z\s]+) is currently single",             # Name is currently single
-        r"([A-Za-z\s]+) did not start (his|her)"          # Name did not start his/her
+        r"([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) is (\d+) years old",
+        r"([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) and the RM",
+        r"([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) and (\w+) have been",
+        r"The RM (?:is|was|has) .* ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+)'s",
+        r"introduced to ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) at",
+        r"([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) brings a wealth of",
+        r"([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) is currently",
+        r"([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) has been",
+        r"([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) crossed paths",
+        r"([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) launched his career"
     ]
 
     full_name = None
@@ -68,14 +79,22 @@ def extract_client_info_from_text(text):
 
     # If still not found, try to find repeated names in the text
     if not full_name:
-        # Look for common 3-part name pattern (especially in these documents)
-        potential_names = re.findall(r'([A-Z][a-z]+ [A-Z][a-z]+ [A-Z][a-z]+)', text)
+        # Look for common 3-part name pattern
+        potential_names = re.findall(r'([A-Z][a-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż]+ [A-Z][a-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż]+ [A-Z][a-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż]+)', text)
         if potential_names:
             # Find the most frequently occurring name
             name_counts = {}
             for name in potential_names:
                 name_counts[name] = name_counts.get(name, 0) + 1
             full_name = max(name_counts, key=name_counts.get)
+        else:
+            # Try 2-part names
+            potential_names = re.findall(r'([A-Z][a-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż]+ [A-Z][a-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż]+)(?!\w)', text)
+            if potential_names:
+                name_counts = {}
+                for name in potential_names:
+                    name_counts[name] = name_counts.get(name, 0) + 1
+                full_name = max(name_counts, key=name_counts.get)
 
     if full_name:
         result["client_info"]["account_name"] = full_name
@@ -84,7 +103,7 @@ def extract_client_info_from_text(text):
         # Split name into first and last names
         name_parts = full_name.split()
         if len(name_parts) >= 2:
-            # For three-part names like "Emil Julian Klein"
+            # For multi-part names
             if len(name_parts) >= 3:
                 result["client_info"]["account_holder_name"] = " ".join(name_parts[:-1])
                 result["client_info"]["account_holder_surname"] = name_parts[-1]
@@ -92,136 +111,381 @@ def extract_client_info_from_text(text):
                 result["client_info"]["account_holder_name"] = name_parts[0]
                 result["client_info"]["account_holder_surname"] = name_parts[-1]
 
+    # EXTRACT AGE
+    age_patterns = [
+        r"is (\d+) years old",
+        r"is a (\d+) year old",
+        r"is a (\d+)-year-old",
+        r"is a (\d+) year old \w+",
+        r"(\d+) year old \w+ from"
+    ]
+
+    for pattern in age_patterns:
+        match = re.search(pattern, text)
+        if match:
+            result["client_info"]["age"] = match.group(1)
+            break
+
     # EXTRACT COUNTRY
     country_patterns = [
-        r"from ([A-Za-z]+)\.",        # from X.
-        r"comes from ([A-Za-z]+)\.",  # comes from X.
-        r"comes from ([A-Za-z]+) ",   # comes from X
-        r"citizen of ([A-Za-z]+)"     # citizen of X
+        r"from ([A-Za-z\s]+)\.(?!\w)",
+        r"comes from ([A-Za-z\s]+)\.(?!\w)",
+        r"comes from ([A-Za-z\s]+)(?=\s)",
+        r"from ([A-Za-z\s]+)(?=\s|\.|$)",
+        r"(\d+) year old .+ from ([A-Za-z\s]+)"
     ]
 
     for pattern in country_patterns:
         match = re.search(pattern, text)
         if match:
-            result["client_info"]["country"] = match.group(1)
+            if "year old" in pattern and len(match.groups()) > 1:
+                country = match.group(2).strip()
+            else:
+                country = match.group(1).strip()
+
+            # Standardize country names
+            country_standardization = {
+                "Czech": "Czech Republic",
+                "USA": "United States",
+                "UK": "United Kingdom",
+                "UAE": "United Arab Emirates"
+            }
+            result["client_info"]["country"] = country_standardization.get(country, country)
             break
 
     # EXTRACT CITY
-    # First try direct city mentions
-    city_patterns = [
-        r"in ([A-Za-z]+)\. They",                # in City. They
-        r"seminar in ([A-Za-z]+)\.",             # seminar in City.
-        r"based in ([A-Za-z]+)",                 # based in City
-        r"located in ([A-Za-z]+)",               # located in City
-        r"lives? in ([A-Za-z]+)"                 # lives in City
+    # Try to find cities from property locations first
+    property_city_matches = re.findall(r"(?:apartment|property|townhouse|flat|house|condo|villa) (?:located |situated |)in ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+?)(?:,|\.|\s|$)", text)
+    property_cities = [city.strip() for city in property_city_matches]
+
+    # Also look for cities mentioned in location lists
+    location_matches = re.findall(r"locations across ([^\.]+)", text)
+    for match in location_matches:
+        # Split by 'and' or commas
+        locations = re.split(r' and |, ', match)
+        property_cities.extend([loc.strip() for loc in locations])
+
+    # If we found property cities, use the first one as the client's city
+    if property_cities:
+        result["client_info"]["city"] = property_cities[0]
+    else:
+        # Otherwise try direct city mentions
+        city_patterns = [
+            r"retreat in ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+)[,\.]",
+            r"conference in ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+)[,\.]",
+            r"in ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+)\. They",
+            r"lives in ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+)",
+            r"residing in ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+)"
+        ]
+
+        for pattern in city_patterns:
+            match = re.search(pattern, text)
+            if match:
+                result["client_info"]["city"] = match.group(1).strip()
+                break
+
+    # EXTRACT MARITAL STATUS
+    if re.search(r"currently divorced", text, re.IGNORECASE):
+        result["client_info"]["marital_status"] = "Divorced"
+    elif re.search(r"currently widowed", text, re.IGNORECASE):
+        result["client_info"]["marital_status"] = "Widowed"
+    elif re.search(r"(married|tied the knot|have been married)", text, re.IGNORECASE):
+        result["client_info"]["marital_status"] = "Married"
+    elif re.search(r"currently single", text, re.IGNORECASE):
+        result["client_info"]["marital_status"] = "Single"
+
+    # EXTRACT CHILDREN
+    children_pattern1 = re.search(r"(?:has|have) (\d+) (?:kids|children)", text)
+    if children_pattern1:
+        # Try to find child names
+        child_names_match = re.search(r"called ([^\.]+)", text)
+        if child_names_match:
+            names_text = child_names_match.group(1)
+            # Split names by 'and' or commas
+            names = re.split(r' and |, ', names_text)
+            result["client_info"]["children"] = [name.strip() for name in names]
+        else:
+            # Just record the number
+            result["client_info"]["children"] = [f"Child {i+1}" for i in range(int(children_pattern1.group(1)))]
+    elif "parents of" in text.lower():
+        children_match = re.search(r"parents of (\d+) children: ([^\.]+)", text)
+        if children_match:
+            names_text = children_match.group(2)
+            # Split names by 'and' or commas
+            names = re.split(r' and |, ', names_text)
+            result["client_info"]["children"] = [name.strip() for name in names]
+    elif "does not have any children" in text.lower():
+        result["client_info"]["children"] = []
+
+    # EXTRACT EDUCATION
+    # Secondary education
+    secondary_edu_patterns = [
+        r"(?:received|earned|completed) (?:his|her) secondary (?:school|education) (?:diploma |)from ([^\.]+) in (\d{4})",
+        r"graduated from ([^\.]+) in (\d{4})",
+        r"finished secondary school at ([^\.]+) in (\d{4})"
     ]
 
-    for pattern in city_patterns:
+    for pattern in secondary_edu_patterns:
         match = re.search(pattern, text)
         if match:
-            result["client_info"]["city"] = match.group(1)
+            result["client_info"]["education"]["secondary_school"] = match.group(1).strip()
+            result["client_info"]["education"]["secondary_graduation_year"] = match.group(2)
             break
 
-    # If no direct city mention, try to extract from education
-    if not result["client_info"]["city"]:
-        # Try to extract city from school name
-        edu_match = re.search(r"school(?:.*?)from ([^\.]+) in", text)
-        if edu_match:
-            school = edu_match.group(1).strip()
-            # Extract the last word which is often the city
-            parts = school.split()
-            if len(parts) > 1:
-                potential_city = parts[-1]
-                # Filter out non-city words
-                if potential_city not in ["School", "College", "Academy", "Gymnasium"]:
-                    result["client_info"]["city"] = potential_city
+    # University education - multiple universities possible
+    university_patterns = [
+        r"earned (?:his|her) (?:degree|additionally degree) from ([^\.]+) in (\d{4})",
+        r"graduated from ([^\.]+) (?:with|in) .* in (\d{4})",
+        r"study at ([^\.]+) until (\d{4})",
+        r"attended ([^,\.]+) (?:and|until|which he|which she) graduated in (\d{4})"
+    ]
 
-    # Check for city name in property locations
-    if not result["client_info"]["city"]:
-        property_match = re.search(r"properties(?:.*?)across ([^\.]+)", text)
-        if property_match:
-            locations = property_match.group(1).split("and")
-            if locations:
-                result["client_info"]["city"] = locations[0].strip()
+    # Find all universities
+    for pattern in university_patterns:
+        for match in re.finditer(pattern, text):
+            university = match.group(1).strip()
+            year = match.group(2)
 
-    # If still no city found and we have a country, set a default major city
-    if not result["client_info"]["city"] and result["client_info"]["country"]:
-        country_city_map = {
-            "Germany": "Berlin",
-            "Poland": "Warsaw",
-            "Italy": "Rome",
-            "France": "Paris",
-            "Spain": "Madrid",
-            "Portugal": "Lisbon",
-            "Switzerland": "Zurich",
-            "Austria": "Vienna",
-            "Belgium": "Brussels"
+            # Only add if not already in the list
+            if university not in result["client_info"]["education"]["university"]:
+                result["client_info"]["education"]["university"].append(university)
+                result["client_info"]["education"]["university_graduation_years"].append(year)
+
+    # EXTRACT OCCUPATION
+    # Try to find current/last occupation
+    occupation_patterns = [
+        r"retired ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) from",
+        r"(\d+) year old retired ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) from",
+        r"(\d+) year old ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) from",
+        r"position of ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) (?:at|from) ([^,\.]+).*?from (\d{4}) to (\d{4}|\w+)",
+        r"role of ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) at"
+    ]
+
+    for pattern in occupation_patterns:
+        match = re.search(pattern, text)
+        if match and not result["client_info"]["occupation"]:
+            if "year old retired" in pattern:
+                result["client_info"]["occupation"] = match.group(2).strip()
+            elif "year old" in pattern and "retired" not in pattern:
+                result["client_info"]["occupation"] = match.group(2).strip()
+            else:
+                result["client_info"]["occupation"] = match.group(1).strip()
+
+    # EXTRACT CAREER HISTORY
+    # Look for all job positions mentioned
+    position_patterns = [
+        r"as (?:a|an) ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) at ([^,\.]+).*?from (\d{4}) to (\d{4}|\w+)",
+        r"position of ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) (?:at|from) ([^,\.]+).*?from (\d{4}) to (\d{4}|\w+)",
+        r"worked as (?:a|an) ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) (?:at|from) ([^,\.]+).*?from (\d{4}) to (\d{4}|\w+)"
+    ]
+
+    career_entries = []
+
+    for pattern in position_patterns:
+        for match in re.finditer(pattern, text):
+            position = match.group(1).strip()
+            company = match.group(2).strip()
+            start_year = match.group(3)
+            end_year = match.group(4)
+
+            career_entries.append({
+                "position": position,
+                "company": company,
+                "start_year": start_year,
+                "end_year": end_year if end_year.isdigit() else "present"
+            })
+
+    # Also check for positions without explicit years
+    simpler_patterns = [
+        r"worked as (?:a|an) ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) at ([^,\.]+)",
+        r"position of ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) at ([^,\.]+)",
+        r"role as (?:a|an) ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) at ([^,\.]+)"
+    ]
+
+    for pattern in simpler_patterns:
+        for match in re.finditer(pattern, text):
+            position = match.group(1).strip()
+            company = match.group(2).strip()
+
+            # Only add if we don't already have this position
+            if not any(entry["position"] == position and entry["company"] == company for entry in career_entries):
+                career_entries.append({
+                    "position": position,
+                    "company": company,
+                    "start_year": "",
+                    "end_year": ""
+                })
+
+    # Add career entries to result
+    if career_entries:
+        result["client_info"]["career_history"] = career_entries
+
+    # EXTRACT LAST SALARY
+    salary_match = re.search(r"(?:earned|remuneration of|compensated with|salary of) (\d+) ([A-Z]{3}) p\.A\.", text)
+    if salary_match:
+        result["client_info"]["last_salary"]["amount"] = salary_match.group(1)
+        result["client_info"]["last_salary"]["currency"] = salary_match.group(2)
+
+    # EXTRACT SAVINGS
+    savings_patterns = [
+        r"saved (?:approximately |)(\d+) ([A-Z]{3})",
+        r"saving (\d+) ([A-Z]{3})",
+        r"saved[^0-9]+(\d+) ([A-Z]{3})"
+    ]
+
+    for pattern in savings_patterns:
+        match = re.search(pattern, text)
+        if match:
+            result["client_info"]["savings"]["amount"] = match.group(1)
+            result["client_info"]["savings"]["currency"] = match.group(2)
+            break
+
+    # EXTRACT REAL ESTATE
+    # Method 1: Look for properties with locations and values
+    property_patterns = [
+        r"(?:has|purchased|owns|bought) (?:a |)([a-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+) (?:located |situated |)in ([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+),?[^,\.]+?(?:worth|valued at) ([0-9,.]+) ([A-Z]{3})"
+    ]
+
+    for pattern in property_patterns:
+        for match in re.finditer(pattern, text):
+            property_type = match.group(1).strip()
+            location = match.group(2).strip()
+            value = match.group(3).replace(',', '')
+            currency = match.group(4)
+
+            result["client_info"]["real_estate"].append({
+                "type": property_type,
+                "location": location,
+                "value": value,
+                "currency": currency
+            })
+
+    # Method 2: Look for the "stunning properties" pattern
+    property_count_match = re.search(r"comprises (\d+) stunning properties[^\.]+ across ([^\.]+)", text)
+    if property_count_match:
+        count = int(property_count_match.group(1))
+        locations_text = property_count_match.group(2)
+
+        # Split locations by 'and' or commas
+        locations = re.split(r' and |, ', locations_text)
+
+        for i, location in enumerate(locations[:count]):  # Limit to the number mentioned
+            result["client_info"]["real_estate"].append({
+                "type": "Property",
+                "location": location.strip(),
+                "value": "",
+                "currency": ""
+            })
+
+    # EXTRACT INHERITANCE DETAILS
+    inheritance_patterns = [
+        r"(?:inheritance|inherited|received) (?:a |an |of |)(?:significant sum of |sum of |)(\d+) ([A-Z]{3}) from (?:her|his) (?:late |)([a-z]+),\s*(?:a |an |)(?:renowned |respected |prominent |well-known |)([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+?)[,\.].*?in (\d{4})",
+        r"inheritance of (\d+) ([A-Z]{3}) from (?:her|his) (?:late |)([a-z]+).*?([A-Za-zÀ-ÖØ-öø-ÿĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]+?)(?:,|\.) in (\d{4})"
+    ]
+
+    for pattern in inheritance_patterns:
+        match = re.search(pattern, text)
+        if match:
+            result["client_info"]["inheritance_details"]["amount"] = match.group(1)
+            result["client_info"]["inheritance_details"]["currency"] = match.group(2)
+            result["client_info"]["inheritance_details"]["relation"] = match.group(3)
+            result["client_info"]["inheritance_details"]["relative_occupation"] = match.group(4).strip()
+            result["client_info"]["inheritance_details"]["year"] = match.group(5)
+            break
+
+    # Check for no inheritance statement
+    if "does not have any inheritances" in text:
+        result["client_info"]["inheritance_details"] = {
+            "amount": "0",
+            "currency": "",
+            "year": "",
+            "relation": "",
+            "relative_occupation": ""
         }
-        result["client_info"]["city"] = country_city_map.get(result["client_info"]["country"], "")
 
-    # EXTRACT CURRENCY INFORMATION
-    # Check for currency mentions and set fields accordingly
-    if re.search(r"\d+\s*EUR", text):
-        result["client_info"]["eur"] = "/Yes"
-    elif re.search(r"\d+\s*CHF", text):
-        result["client_info"]["chf"] = "/Yes"
-    elif re.search(r"\d+\s*USD", text):
-        result["client_info"]["usd"] = "/Yes"
-    elif re.search(r"\d+\s*PLN", text):
-        result["client_info"]["other_ccy"] = "PLN"
+    # EXTRACT CURRENCY INFORMATION (EUR/CHF/USD)
+    if any(result["client_info"]["last_salary"]["currency"] == currency or
+           result["client_info"]["savings"]["currency"] == currency or
+           (result["client_info"]["inheritance_details"].get("currency") == currency and
+            int(result["client_info"]["inheritance_details"].get("amount", 0)) > 0) or
+           any(prop["currency"] == currency for prop in result["client_info"]["real_estate"])
+           for currency in ["EUR", "CHF", "USD"]):
 
-    # GENERATE EMAIL
-    if result["client_info"]["name"]:
-        name_parts = result["client_info"]["name"].lower().split()
-        country = result["client_info"]["country"]
+        if "EUR" in [result["client_info"]["last_salary"]["currency"],
+                     result["client_info"]["savings"]["currency"],
+                     result["client_info"]["inheritance_details"].get("currency")] or \
+           any(prop["currency"] == "EUR" for prop in result["client_info"]["real_estate"]):
+            result["client_info"]["eur"] = "/Yes"
 
-        # Create email based on name and country
-        if len(name_parts) >= 2:
-            first_name = name_parts[0]
-            last_name = name_parts[-1]
+        if "CHF" in [result["client_info"]["last_salary"]["currency"],
+                     result["client_info"]["savings"]["currency"],
+                     result["client_info"]["inheritance_details"].get("currency")] or \
+           any(prop["currency"] == "CHF" for prop in result["client_info"]["real_estate"]):
+            result["client_info"]["chf"] = "/Yes"
 
-            # Select domain based on country
-            country_domain_map = {
-                "Germany": "web.de",
-                "Poland": "wp.pl",
-                "Italy": "libero.it",
-                "France": "orange.fr",
-                "Spain": "telefonica.es",
-                "Portugal": "sapo.pt",
-                "Switzerland": "bluewin.ch",
-                "Austria": "gmx.at",
-                "Belgium": "skynet.be"
-            }
+        if "USD" in [result["client_info"]["last_salary"]["currency"],
+                     result["client_info"]["savings"]["currency"],
+                     result["client_info"]["inheritance_details"].get("currency")] or \
+           any(prop["currency"] == "USD" for prop in result["client_info"]["real_estate"]):
+            result["client_info"]["usd"] = "/Yes"
 
-            email_domain = country_domain_map.get(country, "gmail.com") if country else "gmail.com"
-            result["client_info"]["email"] = f"{first_name}.{last_name}@{email_domain}"
+    # Check for other currencies
+    all_currencies = [
+        result["client_info"]["last_salary"]["currency"],
+        result["client_info"]["savings"]["currency"],
+        result["client_info"]["inheritance_details"].get("currency", "")
+    ]
 
-    # GENERATE PHONE NUMBER
-    country = result["client_info"]["country"]
-    if country:
-        country_code_map = {
-            "Germany": "+49",
-            "Poland": "+48",
-            "Italy": "+39",
-            "France": "+33",
-            "Spain": "+34",
-            "Portugal": "+351",
-            "Switzerland": "+41",
-            "Austria": "+43",
-            "Belgium": "+32"
-        }
+    all_currencies.extend([prop["currency"] for prop in result["client_info"]["real_estate"] if "currency" in prop])
 
-        code = country_code_map.get(country, "+1")
-        area_code = str(random.randint(100, 9999))
-        subscriber_number = str(random.randint(100000, 999999))
-        result["client_info"]["phone_number"] = f"{code} {area_code} {subscriber_number}"
+    # Set other_ccy if any non-standard currency is found
+    for currency in all_currencies:
+        if currency and currency not in ["", "EUR", "CHF", "USD"]:
+            result["client_info"]["other_ccy"] = currency
+            break
+
+    # Clean up empty structures
+    if not any(result["client_info"]["education"].values()):
+        result["client_info"]["education"] = {}
+
+    if not any(result["client_info"]["inheritance_details"].values()):
+        result["client_info"]["inheritance_details"] = {}
+
+    if not result["client_info"]["last_salary"]["amount"]:
+        result["client_info"]["last_salary"] = {}
+
+    if not result["client_info"]["savings"]["amount"]:
+        result["client_info"]["savings"] = {}
+
+    if not result["client_info"]["real_estate"]:
+        result["client_info"]["real_estate"] = []
+
+    if not result["client_info"]["career_history"]:
+        result["client_info"]["career_history"] = []
 
     return result
 
 
-if __name__ == "__main__":
-    # Example usage
-    example_text = """Summary Note:  The RM is a close family friend of Ana Maria Ramos's parents, having known her since birth. This deep-rooted connection has facilitated a strong and trustworthy professional relationship. Ana Maria Ramos is 21 years old and comes from Portugal. After extensive research, she chose Julius Baer for its strong track record in managing high-net-worth clients.  Family Background:  Ana Maria Ramos is currently single. She does not have any children. Education Background:  Ana earned her secondary school diploma from Escola Secundária de Sá da Bandeira Porto in 2021.  Occupation History:  Ana Maria Ramos is a 21 year old and comes from Portugal. Ana Maria Ramos did not start her professional career yet. Wealth Summary:  She did not have any savings to invest in financial markets. Client does not have any properties.She inherited 2230000 EUR from her grandmother, a well-known Corporate Lawyer, in 2018, allowing her to expand her investment portfolio.  Client Summary:  The RM is excited to help Ana navigate the challenges of starting a career and building a strong financial foundation."""
+def process_text_file(file_path):
+    """
+    Process a text file and extract client information.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            text_content = file.read()
+        return extract_client_info_from_text(text_content)
+    except Exception as e:
+        print(f"Error processing text file: {e}")
+        return {"error": str(e)}
 
-    result = extract_client_info_from_text(example_text)
-    print(json.dumps(result, indent=2, ensure_ascii=False))
+
+if __name__ == "__main__":
+    import sys
+
+    if len(sys.argv) > 1:
+        file_path = sys.argv[1]
+        result = process_text_file(file_path)
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+    else:
+        print("Usage: python text_extractor.py [path_to_text_file]")
+        print("This script extracts client information from a text description.")
