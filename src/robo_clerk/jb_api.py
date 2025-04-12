@@ -20,7 +20,7 @@ def detect_file_extension(decoded_bytes):
     elif all(chr(b).isprintable() or chr(b).isspace() for b in decoded_bytes[:100]):
         return '.txt'
     else:
-        return ''  # Unknown extension
+        return '.txt'  # Just assume txt format
 
 def process_client_data(client_data, save_dir="downloads"):
     os.makedirs(save_dir, exist_ok=True)
