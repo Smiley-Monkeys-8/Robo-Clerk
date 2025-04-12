@@ -1,5 +1,14 @@
 # Robo-Clerk
 
+**Robo Clerk** is a Relationship Manager assistant for reviewing customer documents.
+
+* It checks if the information is complete and consistent.
+* If something is missing or wrong, **it flags** the issue.
+* It also **explains** why a customer is rejected.
+* No customer data is sent to third parties unless anonymized.
+
+Read more in [About](docs/About.md)
+
 ## Getting Started
 
 ### Setup ENV
@@ -26,3 +35,4 @@ poetry install
 ```
 poetry run robo-clerk
 ```
+
