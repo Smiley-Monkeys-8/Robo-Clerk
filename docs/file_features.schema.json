@@ -1,0 +1,33 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Document Extracted Features",
+    "properties": {
+        "source": {
+            "title": "source file of the document",
+            "type": "string"
+        },
+        "client_id": {
+            "title": "id of the client",
+            "type": "string"
+        },
+        "features": {
+            "type": "array",
+            "title": "features extracted from this document",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "description": "key of this feature. Can be a data point or a qualitative attribute",
+                        "type": "string"
+                    },
+                    "value": {
+                        "description": "value of this key"
+                    },
+                    "coordinate": {
+                        "description": "a structure defining where this feature was composed from. Can be lines, pages, pixels etc."
+                    }
+                }
+            }
+        }
+    }
+}
