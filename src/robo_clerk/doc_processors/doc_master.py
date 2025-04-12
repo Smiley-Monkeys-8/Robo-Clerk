@@ -1,37 +1,56 @@
+from dataclasses import dataclass
+from enum import Enum
 import json
 import os
 from robo_clerk.doc_processors.docx import DOCXProcessor
 from robo_clerk.doc_processors.pdf import PDFProcessor
 
+# For simplicity define consts as the name of the docs
 
-def process_pdf(input_folder_path, output_folder_path):
-    """Process pdf document
+class FileType(Enum):
+    DOCX = 'docx'
+    PDF = 'pdf'
+    TXT = 'txt'
+    PNG = 'png'
 
-    Args:
-        input_folder_path (path): the path of the docs to be processed
-        output_folder_path (_type_): destination folder
-    """
-    processor = PDFProcessor(input_folder_path)
-    data = processor.run_pipeline()
-    print("\nAll steps completed. Data retrieved:")
+def get_file_type(filename: str) -> FileType | None:
+    ext = filename.lower().split('.')[-1]
+    for filetype in FileType:
+        if filetype.value == ext:
+            return filetype
+    return None
+
+def get_document_processor(file_type: FileType):
+    if (file_type == FileType.PDF):
+        return PDFProcessor
+    if (file_type == FileType.DOCX):
+        return DOCXProcessor
+    return None
+
+def list_files_in_folder(folder_path: str):
+    for entry in os.listdir(folder_path):
+        full_path = os.path.join(folder_path, entry)
+        if os.path.isfile(full_path):
+            yield full_path
+
+def get_file_name(file_path: str) -> str:
+    return os.path.basename(file_path)
+
+def process_document(file_path: str, output_folder_path):
+    file_name =get_file_name(file_path)
+    file_type = get_file_type(file_name)
+    file_processor = get_document_processor(file_type)
+    if file_processor is None:
+        print(f"no file processor for {file_path}")
+        return
+    data = file_processor(file_path).run_pipeline()
     os.makedirs(output_folder_path, exist_ok=True)
-    with open(os.path.join(output_folder_path, "account.pdf.json"), "w") as json_from_pdf:
-      pdf_pretty_json = json.dumps(data, indent=2)
-      json_from_pdf.write(pdf_pretty_json)
     
+    with open(os.path.join(output_folder_path, f"{file_name}.json"), "w") as json_from_pdf:
+      data_pretty_json = json.dumps(data, indent=2)
+      json_from_pdf.write(data_pretty_json)
 
 
-def process_docx(input_folder_path, output_folder_path):
-    """Process docx document
-
-    Args:
-        input_folder_path (path): the path of the docs to be processed
-        output_folder_path (_type_): destination folder
-    """
-    processor = DOCXProcessor(os.path.join(input_folder_path, "profile.docx"))
-    data = processor.run_pipeline()
-    print("\nAll steps completed. Data retrieved:")
-    os.makedirs(output_folder_path, exist_ok=True)
-    with open(os.path.join(output_folder_path, "profile.docx.json"), "w") as json_from_pdf:
-      pdf_pretty_json = json.dumps(data, indent=2)
-      json_from_pdf.write(pdf_pretty_json)
+def process_documents(input_folder_path, output_folder_path):
+    for file_path in list_files_in_folder(input_folder_path):
+        process_document(file_path, output_folder_path)
