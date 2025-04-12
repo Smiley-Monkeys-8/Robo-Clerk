@@ -10,7 +10,6 @@ def get_result(client_id):
     return Decision.Reject
 
 def get_client_id_from_folder(folder_name):
-    print(folder_name)
     id = folder_name.split("_")[-1]
     print(id)
     return int(id)

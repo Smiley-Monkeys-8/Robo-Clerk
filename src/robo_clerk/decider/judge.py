@@ -125,6 +125,4 @@ def verify_personal_data_consistency(data):
 def handcrafted_decision(file_path: str):
     with open(file_path) as json_file:
         customer_data = json.load(json_file)
-    with open("result.json", "w") as result_file:
-        result = verify_personal_data_consistency(customer_data)
-        result_file.write(json.dumps(result, indent=2))
+        return  verify_personal_data_consistency(customer_data)
