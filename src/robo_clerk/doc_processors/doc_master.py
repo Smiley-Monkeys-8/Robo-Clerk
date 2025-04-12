@@ -1,5 +1,6 @@
 import json
 import os
+from robo_clerk.doc_processors.docx import DOCXProcessor
 from robo_clerk.doc_processors.pdf import PDFProcessor
 
 
@@ -17,4 +18,20 @@ def process_pdf(input_folder_path, output_folder_path):
     with open(os.path.join(output_folder_path, "account.pdf.json"), "w") as json_from_pdf:
       pdf_pretty_json = json.dumps(data, indent=2)
       json_from_pdf.write(pdf_pretty_json)
-    print(data)
+    
+
+
+def process_docx(input_folder_path, output_folder_path):
+    """Process docx document
+
+    Args:
+        input_folder_path (path): the path of the docs to be processed
+        output_folder_path (_type_): destination folder
+    """
+    processor = DOCXProcessor(os.path.join(input_folder_path, "profile.docx"))
+    data = processor.run_pipeline()
+    print("\nAll steps completed. Data retrieved:")
+    os.makedirs(output_folder_path, exist_ok=True)
+    with open(os.path.join(output_folder_path, "profile.docx.json"), "w") as json_from_pdf:
+      pdf_pretty_json = json.dumps(data, indent=2)
+      json_from_pdf.write(pdf_pretty_json)

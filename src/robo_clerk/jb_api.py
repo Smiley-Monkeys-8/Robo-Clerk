@@ -63,7 +63,7 @@ def JB_start_game(api_url, api_key, player_name, save_dir="downloads"):
         client_id=data.get("client_id", "")
     )
 
-def JB_send_decision(api_url, api_key, game_session: GameSession, decision: str):
+def JB_send_decision(api_url, api_key, game_session: GameSession, decision: str, save_dir="downloads"):
     headers = {
       "x-api-key": api_key,
       "Content-Type": "application/json"
@@ -82,7 +82,7 @@ def JB_send_decision(api_url, api_key, game_session: GameSession, decision: str)
     gameover = (status == "gameover")
     if not gameover:
       client_data = data.get("client_data", '')
-      process_client_data(client_data)
+      process_client_data(client_data, save_dir)
       return True
     return False
     
