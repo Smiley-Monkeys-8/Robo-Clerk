@@ -486,7 +486,7 @@ class TXTProcessor:
 
 
     def extract_client_info(self) -> List[Feature]:
-        data = process_text_file(self.file_path)
+        data = process_text_file(self.file_path)["client_info"]
         features: List[Feature] = [Feature(key=key, value=value, coordinates={}) for key, value in data.items()]
         return features
         
