@@ -174,7 +174,7 @@ class TXTProcessorSambanova:
 
             # Extract structured information
             client_info = self.extract_client_info(client_description)
-            features: List[Feature] = [Feature(key=key, value=value, coordinates={}) for key, value in client_info.items()]
+            features: List[Feature] = [Feature(key=key, value=value, source=self.file_path) for key, value in client_info.items()]
 
             return features
 

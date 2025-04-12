@@ -4,4 +4,4 @@ from dataclasses import dataclass
 class Feature:
     key: str
     value: str
-    coordinates: dict
+    source: str

@@ -8,6 +8,7 @@ packages = [{ include = "robo_clerk", from = "src" }]
 
 [tool.poetry.scripts]
 robo-clerk = "robo_clerk.robo_clerk:play_game"
+robo-processor = "robo_clerk.robo_processor:process_test_data"
 
 [tool.poetry.dependencies]
 python = "^3.10"
