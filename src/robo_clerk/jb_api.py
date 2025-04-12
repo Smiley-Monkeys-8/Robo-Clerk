@@ -51,8 +51,6 @@ def JB_start_game(api_url, api_key, player_name, save_dir="downloads"):
         raise Exception(f"API call failed: {response.status_code} - {response.text}")
 
     data = response.json()
-    with open("response.json", "w") as response_file:
-      json.dump(data, response_file)
 
     # Save files from client_data.data if present
     client_data = data.get("client_data", {})
