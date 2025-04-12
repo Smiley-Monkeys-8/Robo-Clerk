@@ -1,35 +1,42 @@
+## Why
 
-## Why?
+Karen works at JB. She helps people join the financial market. To do that, she must read. A lot.
 
-Karen is a Relationship Manager. She needs to to process a large number of customer documents for onboarding them on the finacial market.
+She gets stacks of documents. They come in all shapes and sizes. Some are clear. Others are not. Her job is to read them all and decide.
 
-She needs to read trough hundreds of pages of documentation and find inconsistencies. This project is time consuming and high stress due to the risk of the decision.
+Does this person qualify? Are the documents right? Is something missing? She must know. If she’s wrong, it’s a problem.
 
-Karen needs to decide if the customer should correct documents or provide additional information, or consider the client onboarded
+The work is slow. The pressure is high. Each decision matters. Every mistake has a cost.
 
-## How 
+## How
 
-## What are we doing?
+We build something to help her.
 
-### Problem Abstraction
-Problem can be reduced to a classification pipeline:
+## What We Are Doing
 
-* **Input**: Group of documents in different formats about a _natural person_
-* **Output**: Two classes: _Accept_ / _Reject_
+### The Problem
 
-### Additional Input
+This is a sorting task. A decision machine.
 
-Analysis **Reject** class should also include information about "Why?" this decision was done because the relation with the client will change depending on reason:
-* Risk
-* Missing Info
-* Typos
-* etc.
+- **Input**: Documents about a person. Many formats. Many pages.
+- **Output**: Two boxes. _Accept_ or _Reject_.
 
-### Class Definition
+### Extra Detail
 
-* **Accept**: The profile of the customer is complete and consistent
-* **Reject**: The profile of the customer is incomplete or inconsistent
+When we say **Reject**, we must explain why. Not all rejections are equal. The reason shapes what comes next.
 
-## Constraints
+- Risk
+- Missing papers
+- A bad typo
+- Something that doesn’t add up
 
-* Customer data will **NOT** be shipped to third party data processors (unless made anonymous)
+Karen needs to know. The client deserves to know.
+
+### The Rules
+
+- **Accept**: All is clear. All checks out.
+- **Reject**: Something is missing. Or something doesn’t match.
+
+## Boundaries
+
+We keep the data safe. It stays with us. No third parties. Unless it’s made anonymous.
