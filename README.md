@@ -2,15 +2,6 @@
 
 ## Getting Started
 
-### Virtual Environment
-
-```sh
-python3 -m venv .venv
-# source env
-. .venv
-pip install -r requirements.txt
-```
-
 ### Setup ENV
 
 in `.env` file put the variables:
