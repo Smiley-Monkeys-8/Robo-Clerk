@@ -26,6 +26,20 @@ API_URL=https://hackathon-api.mlo.sehlat.io/game
 * install pipx: https://pipx.pypa.io/stable/installation/
 * install poetry: `pipx install poetry`
 
+#### Install Dependencies
+
+* `tesseract-ocr`
+
+Ubuntu:
+```
+sudo apt install tesseract-ocr
+```
+
+MAC:
+```
+brew install tesseract
+```
+
 #### Init Project
 ```
 poetry shell
