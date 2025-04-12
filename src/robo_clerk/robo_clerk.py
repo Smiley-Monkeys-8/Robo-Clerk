@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from robo_clerk.decider.judge import Decision, manual_decision
-from robo_clerk.doc_processors.doc_master import process_docx, process_pdf
+from robo_clerk.doc_processors.doc_master import process_documents
 from robo_clerk.jb_api import JB_send_decision, JB_start_game
 import time
 
@@ -14,10 +14,6 @@ def make_decision(manual: bool = True) -> Decision:
 
 def get_in_out_folders(suffix=""):
     return  f"downloads{suffix}", f"data{suffix}"
-
-def process_documents(input_folder_path, output_folder_path):
-    process_pdf(input_folder_path, output_folder_path)
-    process_docx(input_folder_path, output_folder_path)
 
 def play_game():
     api_key = os.getenv("API_KEY")
