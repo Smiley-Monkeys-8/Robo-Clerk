@@ -45,9 +45,6 @@ class PDFProcessor:
         self.text = all_text
         self.form_fields = all_fields
 
-       # print("Form field keys:", self.form_fields.keys())
-       # print("\nExtracted Form Fields (User Input):\n", self.form_fields)
-
   # 3. Cleaning the text
     def clean_text(self):
         text = unicodedata.normalize("NFKD", self.text)
