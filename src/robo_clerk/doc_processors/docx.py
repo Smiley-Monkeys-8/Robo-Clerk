@@ -99,7 +99,7 @@ class DOCXProcessor:
 
         # Combine personal info with other extracted information
         self.extracted_info = {**personal_info, **tickable_results}
-        features: List[Feature] = [Feature(key=key, value=value, coordinates={}) for key, value in self.extracted_info.items()]
+        features: List[Feature] = [Feature(key=key, value=value, source=self.file_path) for key, value in self.extracted_info.items()]
 
         return features
         

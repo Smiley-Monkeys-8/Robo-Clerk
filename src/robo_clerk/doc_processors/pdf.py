@@ -50,7 +50,7 @@ class PDFProcessor:
         client_info = dict(self.form_fields)
         client_info["signature_image_found"] = self.signature_found
         
-        features: List[Feature] = [Feature(key=key, value=value, coordinates={}) for key, value in client_info.items()]
+        features: List[Feature] = [Feature(key=key, value=value, source=self.file_path) for key, value in client_info.items()]
 
         return features
 

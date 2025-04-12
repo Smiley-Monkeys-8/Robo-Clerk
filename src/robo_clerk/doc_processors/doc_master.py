@@ -23,7 +23,7 @@ def get_document_processor(file_type: FileType):
     
     return None
 
-def process_document(file_path: str, output_folder_path):
+def process_document(file_path: str, output_folder_path, output_file="client_data.json"):
     file_name =get_file_name(file_path)
     file_type = get_file_type(file_name)
     file_processor = get_document_processor(file_type)
@@ -34,9 +34,12 @@ def process_document(file_path: str, output_folder_path):
     data = [asdict(feature) for feature in features]
     os.makedirs(output_folder_path, exist_ok=True)
     
-    with open(os.path.join(output_folder_path, f"{file_name}.json"), "w") as json_from_pdf:
-      data_pretty_json = json.dumps(data, indent=2)
-      json_from_pdf.write(data_pretty_json)
+    with open(os.path.join(output_folder_path, output_file), "r") as json_output:
+      existing_data = json.load(json_output)
+        
+    with open(os.path.join(output_folder_path, output_file), "w") as json_output:
+      data_pretty_json = json.dumps(existing_data + data, indent=2)
+      json_output.write(data_pretty_json)
 
 def list_files_in_folder(folder_path: str):
     for entry in os.listdir(folder_path):
@@ -47,22 +50,8 @@ def list_files_in_folder(folder_path: str):
 def get_file_name(file_path: str) -> str:
     return os.path.basename(file_path)
 
-def process_document(file_path: str, output_folder_path):
-    file_name =get_file_name(file_path)
-    file_type = get_file_type(file_name)
-    file_processor = get_document_processor(file_type)
-    if file_processor is None:
-        print(f"no file processor for {file_path}")
-        return
-    features = file_processor(file_path).run_pipeline()
-    data = [asdict(feature) for feature in features]
-    os.makedirs(output_folder_path, exist_ok=True)
-    
-    with open(os.path.join(output_folder_path, f"{file_name}.json"), "w") as json_from_pdf:
-      data_pretty_json = json.dumps(data, indent=2)
-      json_from_pdf.write(data_pretty_json)
-
-
-def process_documents(input_folder_path, output_folder_path):
+def process_documents(input_folder_path, output_folder_path, output_file="client_data.json"):
+    with open(os.path.join(output_folder_path, output_file), "w") as output_json:
+        output_json.write("[]")
     for file_path in list_files_in_folder(input_folder_path):
         process_document(file_path, output_folder_path)

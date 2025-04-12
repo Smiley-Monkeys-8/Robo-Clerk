@@ -69,7 +69,7 @@ class PNGProcessor:
 
     def extract_client_info(self) -> List[Feature]:
         data = process_passport_image(self.file_path)
-        features: List[Feature] = [Feature(key=key, value=value, coordinates={}) for key, value in data.items()]
+        features: List[Feature] = [Feature(key=key, value=value, source=self.file_path) for key, value in data.items()]
         return features
         
     # Run all steps
