@@ -1,66 +1,63 @@
+#-------------------------------------------------------------------------------------------------
+
+# # Fixed attempt 3 - improved
 from typing import List
-import pytesseract
 from PIL import Image, ImageEnhance, ImageFilter
-import regex as rex
-import json
+import pytesseract
 
 from robo_clerk.doc_processors.types import Feature
 
-# Language model for Tesseract (using English only for simplicity)
+# Supported OCR languages — include English
 TESS_LANG = "eng"
 
-# Preprocessing function to enhance the image for better OCR
+
+# Crop the image to remove the MRZ area
 def preprocess_image(image_path):
     image = Image.open(image_path)
-    image = image.convert("L")  # Convert to grayscale
-    enhancer = ImageEnhance.Contrast(image)
-    image = enhancer.enhance(2)  # Adjust contrast to improve text clarity
-    image = image.filter(ImageFilter.SHARPEN)  # Sharpen the image for better detail
+    # Convert to grayscale
+    image = image.convert("L")
+
+    # Enhance contrast
+    image = ImageEnhance.Contrast(image).enhance(2)
+
+    # Apply sharpen filter
+    new_size = (1200, 900)  # e.g., (300, 200)
+
+    # Resize image
+    image = image.resize(new_size)  # ANTIALIAS gives better quality
+    # image = image.filter(ImageFilter.GaussianBlur)
+    image = image.filter(ImageFilter.SHARPEN)
+    
     return image
 
-# Simpler function to extract basic fields like passport number, surname, etc.
-def extract_fields(text):
-    # Simpler regex patterns
-    fields = {
-        "surname": r"([A-Z]+)",  # Assuming surname is all uppercase letters (simple)
-        "passport_number": r"([A-Z0-9]{8,})",  # Match passport numbers
-        "birth_date": r"(\d{2}-[A-Za-z]{3}-\d{4})",  # Birth date in DD-MMM-YYYY format
-        "sex": r"(M|F)",  # Gender - Male or Female
-        "citizenship": r"([A-Za-z\s]+)",  # Citizenship (could be a country name)
-        "issue_date": r"(\d{2}-[A-Za-z]{3}-\d{4})",  # Issue date in DD-MMM-YYYY format
-        "expiry_date": r"(\d{2}-[A-Za-z]{3}-\d{4})",  # Expiry date in DD-MMM-YYYY format
-    }
 
-    # Store extracted fields in a dictionary
-    extracted_data = {}
+def crop_and_get_text(image, box):
+    cropped_image = image.crop(box)
+    # cropped_image.save("cropped.png")
+    text = pytesseract.image_to_string(cropped_image)
+    return text.strip()
 
-    for key, pattern in fields.items():
-        match = rex.search(pattern, text)
-        if match:
-            extracted_data[key] = match.group(1).strip()
 
-    return extracted_data
-
-# Main function to process passport image and extract data
-def process_passport_image(image_path):
-    # Preprocess the image for better OCR results
+# Main processing function
+def process_passport_image(image_path, output_path="./data/passport_data.json"):
     image = preprocess_image(image_path)
+    # image.save("test.png")
     
-    # Perform OCR to extract text from the image
-    text = pytesseract.image_to_string(image, lang=TESS_LANG)
-
-    # Debugging: Print the raw OCR text
-    print("Extracted Text:")
-    print(text)
-
-    # Extract relevant fields (e.g., surname, passport number)
-    extracted_data = extract_fields(text)
-
-    # If no data was extracted, notify the user
-    if not extracted_data:
-        print("⚠️ No valid fields were extracted.")
+    box_mapping = {
+        "country":(50, 0, image.width, 120),
+        "surname":(50, 300, 300, 380),
+        "given_name":(300, 300, 900, 380),
+        "birth_date":(50, 420, 300, 480),
+        "citizenship":(300, 420, 900, 480),
+        "sex":(50, 540, 300, 600),
+        "issue_date":(300, 540, 900, 600),
+        "expiry_date":(300, 630, 800, 700),
+        "passport_number":(700, 160, 1100, 200)
+    }
     
-    return extracted_data
+    data = { key: crop_and_get_text(image, box) for key, box in box_mapping.items()}
+    print(data)
+    return data
 
 class PNGProcessor:
     def __init__(self, file_path):
@@ -76,12 +73,7 @@ class PNGProcessor:
     def run_pipeline(self) -> List[Feature]:
         return self.extract_client_info()
 
-
 # Example usage for debug
 if __name__ == "__main__":
-    image_path = "./downloads/passport.png"  # Update with the correct image path
-    data = process_passport_image(image_path)
-
-    # Show the result
-    print("\n📋 Extracted Passport Data:")
-    print(json.dumps(data, indent=4, ensure_ascii=False))
+    image_path = "./downloads/passport.png"
+    process_passport_image(image_path)
