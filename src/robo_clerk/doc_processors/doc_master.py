@@ -1,10 +1,11 @@
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 from enum import Enum
 import json
 import os
 from robo_clerk.doc_processors.docx import DOCXProcessor
 from robo_clerk.doc_processors.pdf import PDFProcessor
 from robo_clerk.doc_processors.png import PNGProcessor
+from robo_clerk.doc_processors.process_file_sambanova import TXTProcessorSambanova
 from robo_clerk.doc_processors.text_extractor import TXTProcessor
 
 # For simplicity define consts as the name of the docs
@@ -30,7 +31,8 @@ def get_document_processor(file_type: FileType):
     if (file_type == FileType.PNG):
         return PNGProcessor
     if (file_type == FileType.TXT):
-        return TXTProcessor   
+        # return TXTProcessor   
+        return TXTProcessorSambanova
     
     return None
 
