@@ -15,8 +15,10 @@ Read more in [About](docs/About.md)
 
 in `.env` file put the variables:
 
-API_KEY=`your_api_key`
+```sh
+API_KEY=<your_api_key>
 API_URL=https://hackathon-api.mlo.sehlat.io/game
+```
 
 ### Setup Poetry
 
