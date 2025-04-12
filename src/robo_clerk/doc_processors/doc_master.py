@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from enum import Enum
 import json
 import os
@@ -43,7 +43,8 @@ def process_document(file_path: str, output_folder_path):
     if file_processor is None:
         print(f"no file processor for {file_path}")
         return
-    data = file_processor(file_path).run_pipeline()
+    features = file_processor(file_path).run_pipeline()
+    data = [asdict(feature) for feature in features]
     os.makedirs(output_folder_path, exist_ok=True)
     
     with open(os.path.join(output_folder_path, f"{file_name}.json"), "w") as json_from_pdf:
