@@ -31,7 +31,11 @@ def process_document(file_path: str, output_folder_path, output_file="client_dat
         print(f"no file processor for {file_path}")
         return
     features = file_processor(file_path).run_pipeline()
-    data = [asdict(feature) for feature in features]
+    try:
+        data = [asdict(feature) for feature in features]
+    except:
+        print("could not process features")
+        return
     os.makedirs(output_folder_path, exist_ok=True)
     
     with open(os.path.join(output_folder_path, output_file), "r") as json_output:
@@ -54,4 +58,4 @@ def process_documents(input_folder_path, output_folder_path, output_file="client
     with open(os.path.join(output_folder_path, output_file), "w") as output_json:
         output_json.write("[]")
     for file_path in list_files_in_folder(input_folder_path):
-        process_document(file_path, output_folder_path)
+        process_document(file_path, output_folder_path, output_file=output_file)
