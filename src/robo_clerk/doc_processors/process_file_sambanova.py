@@ -53,6 +53,77 @@ class ClientInfoExtractor:
         - Include ALL family details
         - Extract EXACT values for salaries, savings, inheritance
         - Capture ALL career positions with precise years
+        
+          Output Format:
+        {{
+            "full_name": "Full Name",
+            "first_name": "First Name",
+            "surname": "Last Name",
+            "age": "Age as string",
+            "age_numeric": null,
+            "nationality": "Nationality",
+            "country_of_origin": "Country",
+            "current_city": "City",
+            "current_country": "Country",
+            
+            "marital_status": "Marital Status",
+            "spouse_name": "Spouse Name",
+            "marriage_year": "Marriage Year",
+            
+            "children_names": ["Child1", "Child2"],
+            "children_count": null,
+            
+            "current_occupation": "Occupation",
+            "career_total_years": "Career Years",
+            
+            "education_secondary_school": "Secondary School Name",
+            "education_secondary_graduation_year": "Secondary Graduation Year",
+            "education_universities": ["University Names"],
+            "education_university_graduation_years": ["Graduation Years"],
+            
+            "career_history": [
+                {{
+                    "position": "Job Position",
+                    "company": "Company Name",
+                    "start_year": "Start Year",
+                    "end_year": null
+                }}
+            ],
+            
+            "financial_details": {{
+                "last_salary": {{
+                    "amount": "Salary Amount",
+                    "currency": "Salary Currency"
+                }},
+                "savings": {{
+                    "amount": "Total Savings",
+                    "currency": "Savings Currency"
+                }},
+                "real_estate": [
+                    {{
+                        "location": "Property Location",
+                        "value": "Property Value",
+                        "currency": "Currency",
+                        "type": "Property Type"
+                    }}
+                ],
+                "inheritance": {{
+                    "amount": "Inheritance Amount",
+                    "currency": "Inheritance Currency",
+                    "year": "Inheritance Year",
+                    "relation": "Relation",
+                    "relative_occupation": "Relative's Occupation"
+                }}
+            }},
+            
+            "currency_preferences": {{
+                "chf": "/Currency Preference",
+                "eur": "/Currency Preference",
+                "usd": "/Currency Preference"
+            }},
+            
+            "relationship_manager_notes": "Initial Contact and Acquisition Notes"
+        }}
 
         """
 
