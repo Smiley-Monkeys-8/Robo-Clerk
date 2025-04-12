@@ -1,7 +1,10 @@
+from typing import List
 import pytesseract
 from PIL import Image, ImageEnhance, ImageFilter
 import regex as rex
 import json
+
+from robo_clerk.doc_processors.types import Feature
 
 # Language model for Tesseract (using English only for simplicity)
 TESS_LANG = "eng"
@@ -39,7 +42,7 @@ def extract_fields(text):
     return extracted_data
 
 # Main function to process passport image and extract data
-def process_passport_image(image_path, output_path="./data/passport_data.json"):
+def process_passport_image(image_path):
     # Preprocess the image for better OCR results
     image = preprocess_image(image_path)
     
@@ -57,17 +60,28 @@ def process_passport_image(image_path, output_path="./data/passport_data.json"):
     if not extracted_data:
         print("⚠️ No valid fields were extracted.")
     
-    # Save extracted data to JSON
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(extracted_data, f, indent=4, ensure_ascii=False)
-
-    print(f"✅ Extracted data saved to {output_path}")
     return extracted_data
 
-# Example usage
-image_path = "./downloads/passport.png"  # Update with the correct image path
-data = process_passport_image(image_path)
+class PNGProcessor:
+    def __init__(self, file_path):
+        self.file_path = file_path
 
-# Show the result
-print("\n📋 Extracted Passport Data:")
-print(json.dumps(data, indent=4, ensure_ascii=False))
+
+    def extract_client_info(self) -> List[Feature]:
+        data = process_passport_image(self.file_path)
+        features: List[Feature] = [Feature(key=key, value=value, coordinates={}) for key, value in data.items()]
+        return features
+        
+    # Run all steps
+    def run_pipeline(self) -> List[Feature]:
+        return self.extract_client_info()
+
+
+# Example usage for debug
+if __name__ == "__main__":
+    image_path = "./downloads/passport.png"  # Update with the correct image path
+    data = process_passport_image(image_path)
+
+    # Show the result
+    print("\n📋 Extracted Passport Data:")
+    print(json.dumps(data, indent=4, ensure_ascii=False))
