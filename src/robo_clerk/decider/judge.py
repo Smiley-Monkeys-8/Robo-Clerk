@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 from difflib import SequenceMatcher
 import unicodedata
+from nltk.corpus import wordnet as wn
 
 class Decision(Enum):
     Accept="Accept"
@@ -22,6 +23,10 @@ def verify_personal_data_consistency(data):
     def similar(a, b):
         if a in b or b in a:
             return 1.00
+        
+        # check for all synonyms
+        max_ratio = 0
+        
         return SequenceMatcher(None, a.lower().strip(), b.lower().strip()).ratio()
 
 
@@ -77,6 +82,8 @@ def verify_personal_data_consistency(data):
         ("birth_date_passport.png", "date_of_birth_profile.docx"),
         ("issue_date_passport.png", "id_issue_date_profile.docx"),
         ("expiry_date_passport.png", "id_expiry_date_profile.docx"),
+        ("country_account.pdf", "country_of_domicile_profile.docx"),
+        ("citizenship_passport.png", "nationality_profile.docx"),
     ]
 
     total_checks = 0
@@ -117,8 +124,8 @@ def verify_personal_data_consistency(data):
     if "passport_number_account.pdf" in data and not is_valid_passport_number(data["passport_number_account.pdf"]):
         invalid_data.append(("passport_number_account.pdf", data["passport_number_account.pdf"], "Invalid passport number"))
 
-    if "phone_number_account.pdf" in data and not is_valid_phone_number(data["phone_number_account.pdf"]):
-        invalid_data.append(("phone_number_account.pdf", data["phone_number_account.pdf"], "Invalid phone number"))
+    # if "phone_number_account.pdf" in data and not is_valid_phone_number(data["phone_number_account.pdf"]):
+    #     invalid_data.append(("phone_number_account.pdf", data["phone_number_account.pdf"], "Invalid phone number"))
 
     consistency_percentage = round((consistent / total_checks) * 100, 2) if total_checks > 0 else 100.0
 
@@ -132,7 +139,7 @@ def handcrafted_decision(file_path: str):
     with open(file_path) as json_file:
         customer_data = json.load(json_file)
         result = verify_personal_data_consistency(customer_data)
-        negative_result = result["consistency_percentage"]<90 or len(result["invalid_data"]) > 0
+        negative_result = result["consistency_percentage"] < 95 or len(result["invalid_data"]) > 0
         print(result["invalid_data"], len(result["invalid_data"]))
         decision = Decision.Reject if negative_result else Decision.Accept
         return decision, result
