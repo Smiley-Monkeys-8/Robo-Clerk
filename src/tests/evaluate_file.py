@@ -27,21 +27,18 @@ for file_name in list_files_in_folder("out"):
     client_id = get_client_id_from_file(file_name)
     decision, result = judge.handcrafted_decision(file_name)
     
-    negative_result = decision == judge.Decision.Reject
+    negative_result = (decision == judge.Decision.Reject)
     
     known_result = get_result(client_id)
     if known_result == judge.Decision.Reject and negative_result:
-        print(f"{client_id}: True negative")
         correct += 1 
     if known_result == judge.Decision.Reject and not negative_result:
-        print(f"{client_id}: False positive")
         false_positive += 1
         write_results(result=result, destination_path=os.path.join(false_positive_folder, f"result_{client_id}.json"))
     if known_result == judge.Decision.Accept and not negative_result:
-        print(f"{client_id}: True positive")
+        print(result["invalid_data"], len(result["invalid_data"]), decision)
         correct += 1 
     if known_result == judge.Decision.Accept and negative_result:
-        print(f"{client_id}: False negative")
         false_negative += 1
         write_results(result=result, destination_path=os.path.join(false_negative_folder, f"result_{client_id}.json"))
         

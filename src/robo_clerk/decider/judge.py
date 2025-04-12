@@ -20,15 +20,15 @@ def verify_personal_data_consistency(data):
     invalid_data = []
 
     def similar(a, b):
+        if a in b or b in a:
+            return 1.00
         return SequenceMatcher(None, a.lower().strip(), b.lower().strip()).ratio()
 
-    def is_valid_date(date_str, formats):
-        for fmt in formats:
-            try:
-                return datetime.strptime(date_str.strip(), fmt)
-            except ValueError:
-                continue
-        return None
+
+    def normalize_name(name):
+        name = name.strip().lower()
+        name = unicodedata.normalize('NFKD', name).encode('ASCII', 'ignore').decode()
+        return name
 
     def normalize_date(value):
         if not value:
@@ -50,11 +50,12 @@ def verify_personal_data_consistency(data):
         except:
             return None
 
-
-    def normalize_name(name):
-        name = name.strip().lower()
-        name = unicodedata.normalize('NFKD', name).encode('ASCII', 'ignore').decode()
-        return name
+    def normalize(key, value):
+        if "date" in key:
+            return normalize_date(value)
+        if "name" in key:
+            return normalize_name(value)
+        return value.lower().strip()
 
     def is_valid_email(email):
         return re.match(r"[^@]+@[^@]+\.[^@]+", email.strip())
@@ -65,6 +66,7 @@ def verify_personal_data_consistency(data):
     def is_valid_phone_number(phone):
         return re.match(r"^\+[\d\s\-()]{7,}$", phone.strip())
 
+    # Pairs or groups of keys we expect to be consistent
     matches = [
         ("passport_number_account.pdf", "passport_number_passport.png", "passport_no_profile.docx"),
         ("name_account.pdf", "account_name_account.pdf"),
@@ -84,26 +86,16 @@ def verify_personal_data_consistency(data):
         values = [(k, data.get(k, "")) for k in group if k in data]
         if len(values) > 1:
             base_key, base_val = values[0]
+            base_val_norm = normalize(base_key, base_val)
             for other_key, other_val in values[1:]:
-                if "date" in base_key or "date" in other_key:
-                    base_val_norm = normalize_date(base_val)
-                    other_val_norm = normalize_date(other_val)
-                else:
-                    base_val_norm = normalize_name(base_val)
-                    other_val_norm = normalize_name(other_val)
-
-                is_first_name_case = "first_name" in base_key or "first_name" in other_key
-                name_matches = (
-                    base_val_norm == other_val_norm
-                    or (is_first_name_case and (other_val_norm in base_val_norm or base_val_norm in other_val_norm))
-                )
-
-                if base_val_norm and other_val_norm and (name_matches or similar(base_val_norm, other_val_norm) >= 0.9):
+                other_val_norm = normalize(other_key, other_val)
+                if base_val_norm and other_val_norm and similar(base_val_norm, other_val_norm) >= 0.8:
                     consistent += 1
                 else:
                     inconsistencies.append((group, base_val, other_val))
                 total_checks += 1
 
+    # Validate known formats
     date_fields = [
         "birth_date_passport.png",
         "date_of_birth_profile.docx",
@@ -140,6 +132,7 @@ def handcrafted_decision(file_path: str):
     with open(file_path) as json_file:
         customer_data = json.load(json_file)
         result = verify_personal_data_consistency(customer_data)
-        negative_result = result["consistency_percentage"]<90 or len(result["invalid_data"])
+        negative_result = result["consistency_percentage"]<90 or len(result["invalid_data"]) > 0
+        print(result["invalid_data"], len(result["invalid_data"]))
         decision = Decision.Reject if negative_result else Decision.Accept
         return decision, result
