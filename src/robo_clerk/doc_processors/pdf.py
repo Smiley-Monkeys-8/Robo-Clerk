@@ -1,7 +1,10 @@
 import re
+from typing import List
 import unicodedata
 from PyPDF2 import PdfReader
 import pdfplumber
+
+from robo_clerk.doc_processors.types import Feature
 
 class PDFProcessor:
     def __init__(self, file_path):
@@ -43,11 +46,13 @@ class PDFProcessor:
         self.text = text
 
     # 4. Extracting and storing client info from cleaned text
-    def extract_client_info(self):
-        client_info = dict(self.form_fields)  # Making a copy of the form fields
+    def extract_client_info(self) -> List[Feature]:
+        client_info = dict(self.form_fields)
         client_info["signature_image_found"] = self.signature_found
+        
+        features: List[Feature] = [Feature(key=key, value=value, coordinates={}) for key, value in client_info.items()]
 
-        return client_info
+        return features
 
     # 5. checking for signature
     def detect_signature_as_image(self):
@@ -63,11 +68,9 @@ class PDFProcessor:
                 print(f"No signature found.")
                 return False
 
-    def run_pipeline(self):
+    def run_pipeline(self) -> List[Feature]:
         self.extract_text_and_fields()
         self.clean_text()
         self.detect_signature_as_image()
 
-        return {
-            "client_info": self.extract_client_info()
-        }
+        return self.extract_client_info()

@@ -1,7 +1,10 @@
 import os
 import re
+from typing import List
 from docx import Document
 import unicodedata
+
+from robo_clerk.doc_processors.types import Feature
 
 class DOCXProcessor:
     def __init__(self, file_path):
@@ -40,7 +43,7 @@ class DOCXProcessor:
         #print("Cleaned text:\n", self.cleaned_text, "\n")
 
     # 3. Extracting key-value and tickable options
-    def extract_info(self):
+    def extract_client_info(self):
         # Horrible Regex patterns (thanks chatGPT)
         tickable_patterns = {
             "gender": r"gender.*?\b(female|male)\b",
@@ -96,17 +99,14 @@ class DOCXProcessor:
 
         # Combine personal info with other extracted information
         self.extracted_info = {**personal_info, **tickable_results}
+        features: List[Feature] = [Feature(key=key, value=value, coordinates={}) for key, value in self.extracted_info.items()]
 
-        self.tickable_info = tickable_results
+        return features
+        
 
     # Run all steps
-    def run_pipeline(self):
+    def run_pipeline(self) -> List[Feature]:
         self.extract_text()
         self.clean_text()
-        self.extract_info()
-        return {
-            "text": self.text,
-            "cleaned_text": self.cleaned_text,
-            "info": self.extracted_info,
-            "tickables": self.tickable_info
-        }
+
+        return self.extract_client_info()
