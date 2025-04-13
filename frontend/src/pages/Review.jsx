@@ -398,63 +398,6 @@ export const Review = () => {
       "current employment and function_profile.docx"
     ]);
     
-    // Calculate overall score for status indicator
-    const calculateOverallScore = () => {
-      // Base on identity score, consistency, risk level, and decision
-      let score = 0;
-      
-      // Identity verification (30% weight)
-      score += (identityScore / 100) * 30;
-      
-      // Document consistency (30% weight)
-      score += (consistencyScore / 100) * 30;
-      
-      // Risk level (20% weight)
-      const riskScores = {
-        "Low": 20,
-        "Moderate-Low": 15,
-        "Moderate": 10,
-        "Moderate-High": 5,
-        "High": 0
-      };
-      score += riskScores[riskLevel] || 10;
-      
-      // Decision (20% weight)
-      score += (decision === 'Accept') ? 20 : 0;
-      
-      return score;
-    };
-    
-    const overallScore = calculateOverallScore();
-    
-    const getStatusIndicator = () => {
-      // Score ranges and corresponding indicators
-      if (overallScore >= 80) {
-        return {
-          color: "bg-green-100 text-green-800 border-green-300",
-          icon: "✓",
-          status: "Approved",
-          message: "Client profile meets all requirements"
-        };
-      } else if (overallScore >= 60) {
-        return {
-          color: "bg-yellow-100 text-yellow-800 border-yellow-300",
-          icon: "!",
-          status: "Further Review",
-          message: "Minor issues need to be addressed"
-        };
-      } else {
-        return {
-          color: "bg-red-100 text-red-800 border-red-300",
-          icon: "✕",
-          status: "Declined",
-          message: "Significant concerns identified"
-        };
-      }
-    };
-    
-    const statusIndicator = getStatusIndicator();
-    
     // Generate dynamic recommendation text
     const generateRecommendation = () => {
       if (decision !== 'Accept') return "Additional Verification Required";
@@ -472,6 +415,105 @@ export const Review = () => {
     
     const recommendation = generateRecommendation();
     
+    // Calculate overall score for status indicator with improved logic
+    const calculateOverallScore = () => {
+      // Base on identity score, consistency, risk level, and decision
+      let score = 0;
+      
+      // Identity verification (25% weight)
+      score += (identityScore / 100) * 25;
+      
+      // Document consistency (35% weight) - increased importance
+      score += (consistencyScore / 100) * 35;
+      
+      // Risk level (20% weight)
+      const riskScores = {
+        "Low": 20,
+        "Moderate-Low": 15,
+        "Moderate": 10,
+        "Moderate-High": 5,
+        "High": 0
+      };
+      score += riskScores[riskLevel] || 10;
+      
+      // Decision (20% weight)
+      score += (decision === 'Accept') ? 20 : 0;
+      
+      // Apply penalties for specific issues
+      
+      // Penalty for document inconsistencies
+      if (hasInconsistencies) {
+        // Apply a greater penalty based on number of inconsistencies
+        const inconsistencyPenalty = Math.min(20, inconsistencies.length * 7);
+        score -= inconsistencyPenalty;
+      }
+      
+      // Penalty for passport issues specifically (critical document)
+      const hasPassportIssue = inconsistencies.some(issue => 
+        issue.toLowerCase().includes('passport')
+      );
+      if (hasPassportIssue) {
+        score -= 10; // Additional penalty for passport inconsistencies
+      }
+      
+      // PEP status penalty
+      if (pepStatus === "PEP Identified") {
+        score -= 5;
+      }
+      
+      return Math.max(0, score); // Ensure score doesn't go below 0
+    };
+    
+    const overallScore = calculateOverallScore();
+    
+    const getStatusIndicator = () => {
+      // Get recommendation text
+      const recommendationText = recommendation;
+      
+      // Score ranges and corresponding indicators
+      if (overallScore >= 85) {
+        return {
+          color: "bg-green-100 text-green-800 border-green-300",
+          icon: "✓",
+          status: "Approved",
+          message: "Client profile meets all requirements"
+        };
+      } else if (overallScore >= 70) {
+        // Check for conditional approval
+        if (recommendationText.includes("Conditionally")) {
+          return {
+            color: "bg-yellow-100 text-yellow-800 border-yellow-300",
+            icon: "!",
+            status: "Conditionally Approved",
+            message: "Address document inconsistencies"
+          };
+        } else {
+          return {
+            color: "bg-green-100 text-green-800 border-green-300",
+            icon: "✓",
+            status: "Approved",
+            message: "With additional monitoring"
+          };
+        }
+      } else if (overallScore >= 50) {
+        return {
+          color: "bg-yellow-100 text-yellow-800 border-yellow-300",
+          icon: "!",
+          status: "Further Review",
+          message: "Significant issues to address"
+        };
+      } else {
+        return {
+          color: "bg-red-100 text-red-800 border-red-300",
+          icon: "✕",
+          status: "Declined",
+          message: "Critical concerns identified"
+        };
+      }
+    };
+    
+    const statusIndicator = getStatusIndicator();
+    
     return (
       <div className="pl-10 w-3/5 mb-6">
         <div className="flex items-center mb-4 pt-10">
@@ -479,7 +521,7 @@ export const Review = () => {
           <div className={`border ${statusIndicator.color} rounded-md p-2 flex items-center`}>
             <span className="font-bold text-xl mr-2">{statusIndicator.icon}</span>
             <div>
-              <div className="font-bold">{statusIndicator.status}: {statusIndicator.message}</div>
+              <div className="font-bold">{statusIndicator.status} : {statusIndicator.message}</div>
             </div>
           </div>
         </div>
@@ -488,19 +530,17 @@ export const Review = () => {
           <h3 className="text-xl mb-3">Key Findings</h3>
           <p className="mb-3">
             Identity Verification: {identityScore}% Match <br />
-            Document Consistency: {consistencyScore}% {hasInconsistencies ? "Some Concerns Detected" : "High Consistency"} <br />
+            Document Consistency: {consistencyScore}% {hasInconsistencies ? 
+              <span className="text-yellow-700 font-semibold">Some Concerns Detected</span> : 
+              "High Consistency"} <br />
             Risk Assessment: {riskLevel} Risk <br />
             PEP Status: {pepStatus} <br />
-            Recommendation: {recommendation} <br />
+            <span className="font-semibold">Recommendation: {recommendation}</span> <br />
           </p>
           
           <h3 className="text-xl mb-3">Detailed Analysis</h3>
           <p className="mb-3">
-            Passport Image <br />
             Name Matching: {!hasInconsistencies ? "Exact" : "Minor Discrepancies"} <br />
-            Photo Quality: Clear <br />
-            Expiration Status: Valid <br />
-            Account PDF <br />
             Income Verification: {clientData["financial_details_description.txt"]?.last_salary?.amount !== "null" ? 'Confirmed' : 'Not Available'} <br />
             
             {hasInconsistencies ? (
@@ -514,7 +554,6 @@ export const Review = () => {
               </>
             ) : "No Document Discrepancies Detected"} <br />
             
-            Profile Document <br />
             Personal Information: {identityScore}% Matching <br />
             Flags: {hasInconsistencies ? "Minor issues detected" : "No significant flags detected"} <br />
           </p>
@@ -533,7 +572,7 @@ export const Review = () => {
               ? hasInconsistencies 
                 ? "Proceed with client onboarding after addressing document inconsistencies" 
                 : "Proceed with standard client onboarding"
-              : "Request additional verification and supporting documentation"} <br />
+              : "Request additional verification and supporting documentation"}
             
             {occupation === "No professional career yet" && 
               "Clarify source of wealth and future income expectations"} <br />
