@@ -83,5 +83,15 @@ npm run dev
 poetry run robo-server
 ```
 
+# Team
+
+This was developed as part of [SwissHacks 2025](https://www.swisshacks.com/) for the JB challenge.
+
+Members of **Smiling Monkeys** team:
+
+|   **[Margarita Ferreira](https://www.linkedin.com/in/margarita-ferreira/)**  | **[Marisa Davis](https://www.linkedin.com/in/marisa-j-davis/)** | **[Valdilene Siqueira](https://www.linkedin.com/in/valdilenesiqueira/)** | **[Alexandru But](https://www.linkedin.com/in/alexandrubut/)**   |
+|---|---|---|---|
+
+
 
 
