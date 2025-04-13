@@ -75,7 +75,6 @@ def JB_send_decision(api_url, api_key, game_session: GameSession, decision: str,
 
     response = requests.post(f"{api_url}/decision", json=payload, headers=headers)
     data = response.json()
-    print(data)
     status = data.get("status", '')
     score = data.get("score", '')
     print(status, score)
