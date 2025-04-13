@@ -52,3 +52,31 @@ poetry install
 poetry run robo-clerk
 ```
 
+
+# Web App
+
+## Setup
+
+Download the processed data set: https://drive.google.com/file/d/13mGcHNlrvIvREmcxHrOpI5y46qCotzZQ/view?usp=drive_link
+
+And place it in "out" folder top of the project
+
+---
+Alternatively run the processor `poetry run robo-processor`
+
+## Frontend
+
+```
+cd frontend
+npm install
+npm run dev
+```
+
+## Backend
+
+```
+poetry run robo-server
+```
+
+
+

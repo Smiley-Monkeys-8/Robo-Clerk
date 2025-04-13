@@ -6,13 +6,13 @@ import random
 
 from robo_clerk.decider import judge
 
-PORT = 8003
+PORT = 8000
 JSON_FOLDER = "out_archive_2"
 
 class RandomPoemHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
-        if self.path != "/random":
-            self.send_error(404, "Only /random is supported")
+        if self.path != "/next-client":
+            self.send_error(404, "Only /next-client is supported")
             return
 
         files = [f for f in os.listdir(JSON_FOLDER) if f.endswith(".json")]
@@ -33,13 +33,13 @@ class RandomPoemHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps(content).encode("utf-8"))
 
+class ReusableTCPServer(socketserver.TCPServer):
+    allow_reuse_address = True
 
 def run_server():
-    Handler = RandomPoemHandler
-    with socketserver.TCPServer(("", PORT), Handler) as httpd:
+    with ReusableTCPServer(("", PORT), RandomPoemHandler) as httpd:
         print(f"Serving on http://localhost:{PORT}")
         httpd.serve_forever()
-
 
 if __name__ == "__main__":
     run_server()
