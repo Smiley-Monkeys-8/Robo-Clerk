@@ -82,8 +82,12 @@ def verify_personal_data_consistency(data):
         ("birth_date_passport.png", "date_of_birth_profile.docx"),
         ("issue_date_passport.png", "id_issue_date_profile.docx"),
         ("expiry_date_passport.png", "id_expiry_date_profile.docx"),
-        # ("country_account.pdf", "country_of_domicile_profile.docx"),
+        ("country_account.pdf", "country_of_domicile_profile.docx"),
         ("citizenship_passport.png", "nationality_profile.docx"),
+        # ("country_account.pdf", "country_passport.png"),
+        ("postal_code_account.pdf", "address_profile.docx"),
+        # ("city_account.pdf", "address_profile.docx"),
+        ("building_number_account.pdf", "address_profile.docx"),
     ]
 
     total_checks = 0
@@ -133,6 +137,9 @@ def verify_personal_data_consistency(data):
     # if "investment experience_profile.docx" in data and data["investment experience_profile.docx"].lower().strip() in ["inexperienced"]:
     #     invalid_data.append(("investment experience_profile.docx", data["investment experience_profile.docx"], "risk of investment too high"))
 
+    exposed = "is the client or associated person a politically exposed person as defined in the client acceptance policy?_profile.docx"
+    if exposed in data and data[exposed] != "no":
+        invalid_data.append((exposed, data[exposed], "politically exposed"))
 
     consistency_percentage = round((consistent / total_checks) * 100, 2) if total_checks > 0 else 100.0
 
