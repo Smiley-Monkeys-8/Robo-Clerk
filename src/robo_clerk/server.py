@@ -4,6 +4,8 @@ import json
 import os
 import random
 
+from robo_clerk.decider import judge
+
 PORT = 8000
 JSON_FOLDER = "out"
 

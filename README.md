@@ -21,6 +21,10 @@ SAMBANOVA_API_KEY=<sambanova api key>
 API_URL=https://hackathon-api.mlo.sehlat.io/game
 ```
 
+For using LLM to extract semantic data from text summaries a https://sambanova.ai/ API and add the access token to the `.env`
+
+For regex matching extraction use the TXTProcessor instead of TXTProcessorSambanova in `doc_master.py`
+
 ### Setup Poetry
 
 #### Install Poetry
