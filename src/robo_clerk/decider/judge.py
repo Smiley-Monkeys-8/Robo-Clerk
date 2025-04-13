@@ -73,7 +73,7 @@ def verify_personal_data_consistency(data):
 
     # Pairs or groups of keys we expect to be consistent
     matches = [
-        ("passport_number_account.pdf", "passport_number_passport.png", "passport_no_profile.docx"),
+        # ("passport_number_account.pdf", "passport_number_passport.png", "passport_no_profile.docx"),
         ("name_account.pdf", "account_name_account.pdf"),
         ("account_holder_name_account.pdf", "first_name_profile.docx"),
         ("account_holder_surname_account.pdf", "last_name_profile.docx"),
@@ -82,7 +82,7 @@ def verify_personal_data_consistency(data):
         ("birth_date_passport.png", "date_of_birth_profile.docx"),
         ("issue_date_passport.png", "id_issue_date_profile.docx"),
         ("expiry_date_passport.png", "id_expiry_date_profile.docx"),
-        ("country_account.pdf", "country_of_domicile_profile.docx"),
+        # ("country_account.pdf", "country_of_domicile_profile.docx"),
         ("citizenship_passport.png", "nationality_profile.docx"),
     ]
 
@@ -127,6 +127,13 @@ def verify_personal_data_consistency(data):
     # if "phone_number_account.pdf" in data and not is_valid_phone_number(data["phone_number_account.pdf"]):
     #     invalid_data.append(("phone_number_account.pdf", data["phone_number_account.pdf"], "Invalid phone number"))
 
+    # if "investment risk profile_profile.docx" in data and data["investment risk profile_profile.docx"].lower().strip() in ["high"]:
+    #     invalid_data.append(("investment risk profile_profile.docx", data["investment risk profile_profile.docx"], "risk of investment too high"))
+
+    # if "investment experience_profile.docx" in data and data["investment experience_profile.docx"].lower().strip() in ["inexperienced"]:
+    #     invalid_data.append(("investment experience_profile.docx", data["investment experience_profile.docx"], "risk of investment too high"))
+
+
     consistency_percentage = round((consistent / total_checks) * 100, 2) if total_checks > 0 else 100.0
 
     return {
@@ -140,6 +147,5 @@ def handcrafted_decision(file_path: str):
         customer_data = json.load(json_file)
         result = verify_personal_data_consistency(customer_data)
         negative_result = result["consistency_percentage"] < 95 or len(result["invalid_data"]) > 0
-        print(result["invalid_data"], len(result["invalid_data"]))
         decision = Decision.Reject if negative_result else Decision.Accept
         return decision, result

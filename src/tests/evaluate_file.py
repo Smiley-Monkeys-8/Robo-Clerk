@@ -7,7 +7,6 @@ import json
 
 def get_client_id_from_file(file_name):
     id = file_name.split("_")[-1].split(".")[0]
-    print(id)
     return int(id)
 
 def write_results(result, destination_path):
@@ -22,8 +21,7 @@ false_positive_folder = "out_false_positive"
 os.makedirs(false_negative_folder, exist_ok=True)
 os.makedirs(false_positive_folder, exist_ok=True)
 
-for file_name in list_files_in_folder("out"):
-    print(file_name)
+for file_name in list_files_in_folder("out_archive_2"):
     client_id = get_client_id_from_file(file_name)
     decision, result = judge.handcrafted_decision(file_name)
     
@@ -36,7 +34,6 @@ for file_name in list_files_in_folder("out"):
         false_positive += 1
         write_results(result=result, destination_path=os.path.join(false_positive_folder, f"result_{client_id}.json"))
     if known_result == judge.Decision.Accept and not negative_result:
-        print(result["invalid_data"], len(result["invalid_data"]), decision)
         correct += 1 
     if known_result == judge.Decision.Accept and negative_result:
         false_negative += 1
