@@ -75,13 +75,16 @@ def JB_send_decision(api_url, api_key, game_session: GameSession, decision: str,
 
     response = requests.post(f"{api_url}/decision", json=payload, headers=headers)
     data = response.json()
+    print(data)
     status = data.get("status", '')
     score = data.get("score", '')
     print(status, score)
     gameover = (status == "gameover")
+    
+    
     if not gameover:
       client_data = data.get("client_data", '')
       process_client_data(client_data, save_dir)
-      return True
-    return False
+      return True, data.get("client_id", "")
+    return False, ""
     

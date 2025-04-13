@@ -17,6 +17,7 @@ in `.env` file put the variables:
 
 ```sh
 API_KEY=<your_api_key>
+SAMBANOVA_API_KEY=<sambanova api key>
 API_URL=https://hackathon-api.mlo.sehlat.io/game
 ```
 

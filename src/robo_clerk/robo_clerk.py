@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from robo_clerk.decider.judge import Decision, manual_decision
+from robo_clerk.decider.judge import Decision, handcrafted_decision, manual_decision
 from robo_clerk.doc_processors.doc_master import process_documents
 from robo_clerk.jb_api import JB_send_decision, JB_start_game
 import time
@@ -23,9 +23,13 @@ def play_game():
     while True:
         process_documents(input_folder_path, output_folder_path)
         input_folder_path, output_folder_path = get_in_out_folders()
-        decision = make_decision()
-        time.sleep(1)
-        success = JB_send_decision(api_url, api_key, game_session, decision=decision.value, save_dir=input_folder_path)
+        decision, _ = handcrafted_decision("data/client_data.json")
+        # decision = manual_decision()
+        # time.sleep(1)
+        print(f"DECISION: {decision.value}")
+        print(game_session)
+        success, client_id = JB_send_decision(api_url, api_key, game_session, decision=decision.value, save_dir=input_folder_path)
+        game_session.client_id = client_id
         if success:
             print("✅ Good move! Keep going...\n")
         else:
