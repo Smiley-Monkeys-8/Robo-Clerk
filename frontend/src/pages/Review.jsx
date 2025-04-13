@@ -7,7 +7,6 @@ export const Review = () => {
   const [error, setError] = useState(null);
   const [showRawData, setShowRawData] = useState(false);
 
-  // Function to fetch client data
   const fetchNextClient = async () => {
     setLoading(true);
     setError(null);
@@ -16,7 +15,6 @@ export const Review = () => {
       console.log("Received client data:", data);
       setClientData(data);
       
-      // Clear error even if using fallback data
       setError(null);
     } catch (err) {
       console.error('Error in component:', err);
@@ -26,21 +24,17 @@ export const Review = () => {
     }
   };
 
-  // Fetch data on component mount
   useEffect(() => {
     fetchNextClient();
   }, []);
 
-  // Format financial information
   const formatCurrency = (value, currency) => {
     if (!value || value === "null") return 'N/A';
     
-    // Simple formatting for display
     const formattedValue = parseInt(value).toLocaleString();
     return `${formattedValue} ${currency || ''}`;
   };
 
-  // Helper function to get a value from various possible field names
   const getValueFromFields = (data, fieldOptions) => {
     if (!data) return null;
     
@@ -52,7 +46,6 @@ export const Review = () => {
     return null;
   };
 
-  // Client Profile Section - Dynamic Content based on API response
   const renderClientProfile = () => {
     if (loading) {
       return <div className="flex justify-center items-center h-64">Loading client data...</div>;
@@ -78,10 +71,8 @@ export const Review = () => {
       return <div>No client data available</div>;
     }
 
-    // Check if using fallback data
     const usingFallback = clientData.isFallback === true;
 
-    // Extract relevant information using multiple possible field names
     const fullName = getValueFromFields(clientData, [
       "full_name_description.txt", 
       "name_account.pdf",
@@ -140,7 +131,6 @@ export const Review = () => {
       "marital status_profile.docx"
     ]);
     
-    // Financial information
     const totalWealth = getValueFromFields(clientData, [
       "total_wealth_estimated_profile.docx"
     ]);
@@ -163,10 +153,8 @@ export const Review = () => {
       "investment_experience_profile"
     ]);
     
-    // Get financial details
     const financialDetails = clientData["financial_details_description.txt"];
     
-    // Get the salary or inheritance if available
     let income = estimatedIncome || 'N/A';
     let incomeSource = '';
     
@@ -187,7 +175,6 @@ export const Review = () => {
       }
     }
     
-    // Generate a client ID
     const clientId = `JBD-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
 
     return (
@@ -244,7 +231,6 @@ export const Review = () => {
     );
   };
 
-  // Report Section
   const renderReport = () => {
     if (loading || error || !clientData) {
       return (
@@ -257,15 +243,12 @@ export const Review = () => {
       );
     }
 
-    // Decision and consistency
     const decision = clientData.decision || 'Pending';
     
-    // Calculate a dynamic identity score based on data quality/completeness
     const calculateIdentityScore = () => {
       let score = 0;
       let totalChecks = 0;
       
-      // Check key identity fields
       const fieldChecks = [
         // Personal identity checks
         !!getValueFromFields(clientData, ["full_name_description.txt", "name_account.pdf", "account_name_account.pdf"]),
@@ -298,24 +281,20 @@ export const Review = () => {
     
     // Risk assessment based on multiple factors
     const assessRisk = () => {
-      // Get PEP status
       const isPep = getValueFromFields(clientData, [
         "is the client or associated person a politically exposed person as defined in the client acceptance policy?_profile.docx"
       ]) === "yes";
       
-      // Get investment risk profile
       const riskProfile = getValueFromFields(clientData, [
         "investment risk profile_profile.docx",
         "investment_risk_profile_profile"
       ]);
       
-      // Get experience level
       const experience = getValueFromFields(clientData, [
         "investment experience_profile.docx",
         "investment_experience_profile"
       ]);
       
-      // Calculate base risk
       let riskLevel = "Low";
       
       if (isPep) {
@@ -389,13 +368,11 @@ export const Review = () => {
       ? Math.max(75, 95 - (inconsistencies.length * 5)) 
       : 98;
     
-    // Check for actual PEP status
     const isPep = getValueFromFields(clientData, [
       "is the client or associated person a politically exposed person as defined in the client acceptance policy?_profile.docx"
     ]);
     const pepStatus = isPep === "yes" ? "PEP Identified" : "Not a PEP";
     
-    // Investment profile
     const investmentRiskProfile = getValueFromFields(clientData, [
       "investment risk profile_profile.docx",
       "investment_risk_profile_profile"
@@ -416,7 +393,6 @@ export const Review = () => {
       "type_of_mandate_profile"
     ]);
     
-    // Occupation
     const occupation = getValueFromFields(clientData, [
       "current_occupation_description.txt",
       "current employment and function_profile.docx"
@@ -451,7 +427,6 @@ export const Review = () => {
     
     const overallScore = calculateOverallScore();
     
-    // Determine status indicator based on overall score
     const getStatusIndicator = () => {
       // Score ranges and corresponding indicators
       if (overallScore >= 80) {

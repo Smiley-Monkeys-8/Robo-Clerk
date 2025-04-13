@@ -1,10 +1,8 @@
-// apiClient.js - With enhanced error handling and fallback
 import axios from 'axios';
 
-// Create a custom axios instance with shorter timeout
 const api = axios.create({
   baseURL: '/api',
-  timeout: 5000, // Shorter timeout to avoid long waits
+  timeout: 5000,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -120,7 +118,6 @@ const FALLBACK_DATA_2 = {
   "isFallback": true
 };
 
-// Keep track of which fallback data to use
 let useSecondFallback = false;
 
 /**
@@ -129,35 +126,28 @@ let useSecondFallback = false;
 const clientApi = {
   /**
    * Get the next random client
-   * @returns {Promise<Object>} Client data
+   * @returns {Promise<Object>} 
    */
   getNextClient: async () => {
     try {
-      // Try to get data from the server first
       console.log('Attempting to fetch client data from server...');
       const response = await api.get('/next-client');
       console.log('Successfully fetched client data from server');
       return response.data;
     } catch (error) {
-      // Log the error details for debugging
-      console.error('Error fetching client data:', error);
       
-      // Handle different error types
       let errorMessage = 'An unknown error occurred';
       
       if (error.code === 'ECONNABORTED') {
         errorMessage = 'Server request timed out. Using fallback data.';
       } else if (error.response) {
-        // The server responded with a status code outside the 2xx range
         errorMessage = `Server error: ${error.response.status}. Using fallback data.`;
       } else if (error.request) {
-        // The request was made but no response was received
         errorMessage = 'No response from server. Using fallback data.';
       }
       
       console.warn(errorMessage);
       
-      // Return fallback data, alternating between samples
       useSecondFallback = !useSecondFallback;
       return useSecondFallback ? FALLBACK_DATA_2 : FALLBACK_DATA;
     }
