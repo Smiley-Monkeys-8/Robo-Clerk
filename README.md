@@ -1,5 +1,8 @@
 # Robo-Clerk
 
+<img title="a title" alt="Alt text" src="docs/RoboClerk.png">
+
+
 **Robo Clerk** is a Relationship Manager assistant for reviewing customer documents.
 
 * It checks if the information is complete and consistent.
