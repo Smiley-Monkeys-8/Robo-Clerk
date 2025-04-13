@@ -3,7 +3,7 @@ import ImgHome from "../assets/images/img-home.jpg";
 
 const Home = () => {
   return (
-    <div className=" bg-blue-zodiac flex pt-10 justify-evenly items-center pb-7">
+    <div className=" bg-blue-zodiac min-h-screen flex justify-evenly items-center pb-7">
       <div>
         <h1 className="text-4xl mb-9 text-white">
           Making Decisions, Simplified
